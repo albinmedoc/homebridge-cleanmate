@@ -1,6 +1,6 @@
 import { AccessoryPlugin, Logging, API, Service, HAP, CharacteristicValue, AccessoryConfig } from 'homebridge';
 import CleanmateService from './cleanmateService';
-import { Config, WorkState } from './types';
+import { CleanmateStatus, Config, WorkMode, WorkState } from './types';
 
 class CleanmatePlugin implements AccessoryPlugin {
   logger: Logging;
@@ -14,6 +14,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   switchService: Service;
 
   cleanmateService: CleanmateService;
+  lastStatus?: CleanmateStatus;
 
   constructor(logger: Logging, config: AccessoryConfig, api: API) {
     this.logger = logger;
@@ -27,7 +28,6 @@ class CleanmatePlugin implements AccessoryPlugin {
     this.logger.debug('Initializing Information Service');
     this.informationService = new this.hap.Service.AccessoryInformation();
     this.informationService.setCharacteristic(this.hap.Characteristic.Manufacturer, 'Cleanmate');
-    this.informationService.setCharacteristic(this.hap.Characteristic.Manufacturer, 'TCP');
     this.informationService.getCharacteristic(this.hap.Characteristic.FirmwareRevision)
       .onGet(this.getFirmwareRevision.bind(this));
 
@@ -47,6 +47,9 @@ class CleanmatePlugin implements AccessoryPlugin {
     this.fanService.getCharacteristic(this.hap.Characteristic.Active)
       .onGet(this.getActiveHandler.bind(this))
       .onSet(this.setActiveHandler.bind(this));
+    this.fanService.getCharacteristic(this.hap.Characteristic.RotationSpeed)
+      .onGet(this.getSpeedHandler.bind(this))
+      .onSet(this.setSpeedHandler.bind(this));
 
     /* Switch Service */
     this.logger.debug('Initializing Switch Service');
@@ -60,13 +63,44 @@ class CleanmatePlugin implements AccessoryPlugin {
 
     /* Update status of Cleanmate robot at an interval */
     setInterval(() => {
-      this.logger.debug(`Try getting status from ${this.config.name}`);
-      this.cleanmateService.updateStatus().then(() => {
+      this.cleanmateService.updateStatus().then((status) => {
         this.logger.debug(`Got status from ${this.config.name}`, this.cleanmateService.status);
+        this.onStatusUpdate(status);
       }).catch((err) => {
         this.logger.error(`Could not get status from ${this.config.name}`, err);
       });
     }, 1000 * this.config.pollInterval);
+  }
+
+  onStatusUpdate(status: CleanmateStatus) {
+    if(status.version && this.lastStatus?.version !== status.version) {
+      this.informationService.updateCharacteristic(this.hap.Characteristic.FirmwareRevision, status.version);
+    }
+    if(status.batteryLevel && this.lastStatus?.batteryLevel !== status.batteryLevel) {
+      this.batteryService.updateCharacteristic(this.hap.Characteristic.BatteryLevel, status.batteryLevel);
+    }
+    if(status.workState && this.lastStatus?.workState !== status.workState) {
+      const charging = status.workState === WorkState.Charging;
+      this.batteryService.updateCharacteristic(
+        this.hap.Characteristic.ChargingState, charging ?
+          this.hap.Characteristic.ChargingState.CHARGING :
+          this.hap.Characteristic.ChargingState.NOT_CHARGING,
+      );
+      const active = status.workState === WorkState.Charging;
+      this.fanService.updateCharacteristic(
+        this.hap.Characteristic.Active, active ?
+          this.hap.Characteristic.Active.ACTIVE :
+          this.hap.Characteristic.Active.INACTIVE,
+      );
+
+      const paused = status.workState === WorkState.Paused;
+      this.switchService.updateCharacteristic(this.hap.Characteristic.On, paused);
+    }
+    if(status.workMode && this.lastStatus?.workMode !== status.workMode) {
+      this.fanService.updateCharacteristic(this.hap.Characteristic.RotationSpeed, this.getSpeedByMode(status.workMode));
+    }
+
+    this.lastStatus = status;
   }
 
   getServices() {
@@ -76,6 +110,19 @@ class CleanmatePlugin implements AccessoryPlugin {
       this.fanService,
       this.switchService,
     ];
+  }
+
+  getSpeedByMode(workMode: WorkMode) {
+    switch(workMode) {
+      case WorkMode.Silent:
+        return 17;
+      case WorkMode.Standard:
+        return 50;
+      case WorkMode.Intensive:
+        return 82;
+      default:
+        return 0;
+    }
   }
 
   /* --- Information Service --- */
@@ -116,6 +163,28 @@ class CleanmatePlugin implements AccessoryPlugin {
   /* Set active/cleaning status of the robot */
   setActiveHandler(value: CharacteristicValue) {
     value === this.hap.Characteristic.Active.ACTIVE ? this.cleanmateService.start() : this.cleanmateService.charge();
+  }
+
+  /* Set speed level of the fan */
+  getSpeedHandler(): CharacteristicValue {
+    if(this.cleanmateService.status.workState !== WorkState.Cleaning || !this.cleanmateService.status.workMode){
+      return 0;
+    }
+    return this.getSpeedByMode(this.cleanmateService.status.workMode);
+  }
+
+  /* Get speed level of the fan */
+  setSpeedHandler(value: CharacteristicValue) {
+    if(value === 0) {
+      this.cleanmateService.pause();
+      // Pause
+    } else if(value < 33) {
+      this.cleanmateService.start(WorkMode.Silent);
+    } else if (value < 66) {
+      this.cleanmateService.start(WorkMode.Standard);
+    } else {
+      this.cleanmateService.start(WorkMode.Intensive);
+    }
   }
 
   /* --- Switch Service --- */

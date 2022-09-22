@@ -16,7 +16,7 @@ export enum WorkMode {
 export enum WorkState {
     Cleaning = 1,
     Paused = 2,
-    Charging = 6,
+    Charging = 5,
     Problem = 9
 }
 
