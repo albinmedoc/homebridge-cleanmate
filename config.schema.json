@@ -1,7 +1,7 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
-  "pluginType": "platform",
-  "singular": true,
+  "pluginAlias": "Cleanmate",
+  "pluginType": "accessory",
+  "singular": false,
   "schema": {
     "type": "object",
     "properties": {
@@ -9,7 +9,29 @@
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Cleanmate robot"
+      },
+      "ipAddress": {
+        "title": "Ip adress",
+        "type": "string",
+        "required": true,
+        "format": "ipv4",
+        "description": "Ip adress of the robot. Make sure it has a static ip"
+      },
+      "authCode": {
+        "title": "Authentication code",
+        "type": "string",
+        "required": true,
+        "minLength": 10,
+        "maxLength": 10,
+        "description": "The authentication code is 32 digits"
+      },
+      "pollInterval": {
+        "title": "Poll interval",
+        "type": "number",
+        "required": true,
+        "default": 30,
+        "description": "How often the status should be updated (in seconds)"
       }
     }
   }
