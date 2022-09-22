@@ -2,7 +2,7 @@
   "private": false,
   "displayName": "Homebridge Cleanmate",
   "name": "homebridge-cleanmate",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Adds homekit-support to your cleanmate vacuum cleaner.",
   "license": "Apache-2.0",
   "repository": {

@@ -5,6 +5,7 @@ export interface Config extends AccessoryConfig {
     ipAddress: string;
     authCode: string;
     pollInterval: number;
+    lowBatteryPercentage: number;
 }
 
 export enum WorkMode {

@@ -78,6 +78,10 @@ class CleanmatePlugin implements AccessoryPlugin {
     }
     if(status.batteryLevel && this.lastStatus?.batteryLevel !== status.batteryLevel) {
       this.batteryService.updateCharacteristic(this.hap.Characteristic.BatteryLevel, status.batteryLevel);
+      this.batteryService.updateCharacteristic(
+        this.hap.Characteristic.StatusLowBattery,
+        status.batteryLevel <= this.config.lowBatteryPercentage,
+      );
     }
     if(status.workState && this.lastStatus?.workState !== status.workState) {
       const charging = status.workState === WorkState.Charging;
@@ -136,7 +140,9 @@ class CleanmatePlugin implements AccessoryPlugin {
 
   /* Get low battery status of the robot */
   getLowBatteryHandler(): CharacteristicValue {
-    const low = this.cleanmateService.status.batteryLevel ? this.cleanmateService.status.batteryLevel < 15 : false;
+    const low = this.cleanmateService.status.batteryLevel ?
+      this.cleanmateService.status.batteryLevel < this.config.lowBatteryPercentage :
+      false;
     return low ? this.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : this.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
   }
 

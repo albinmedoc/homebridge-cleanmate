@@ -32,6 +32,13 @@
         "required": true,
         "default": 30,
         "description": "How often the status should be updated (in seconds)"
+      },
+      "lowBatteryPercentage": {
+        "title": "Low battery percentage",
+        "type": "number",
+        "required": true,
+        "default": 15,
+        "description": "When should the robot report low battery"
       }
     }
   }
