@@ -1,6 +1,6 @@
 import { AccessoryPlugin, Logging, API, Service, HAP, CharacteristicValue, AccessoryConfig } from 'homebridge';
 import CleanmateService from './cleanmateService';
-import { Config, WorkMode } from './types';
+import { Config, WorkState } from './types';
 
 class CleanmatePlugin implements AccessoryPlugin {
   logger: Logging;
@@ -9,8 +9,9 @@ class CleanmatePlugin implements AccessoryPlugin {
   config: Config;
 
   informationService: Service;
-  fanService: Service;
   batteryService: Service;
+  fanService: Service;
+  switchService: Service;
 
   cleanmateService: CleanmateService;
 
@@ -30,13 +31,6 @@ class CleanmatePlugin implements AccessoryPlugin {
     this.informationService.getCharacteristic(this.hap.Characteristic.FirmwareRevision)
       .onGet(this.getFirmwareRevision.bind(this));
 
-    /* Fan Service */
-    this.logger.debug('Initializing Fan Service');
-    this.fanService = new this.hap.Service.Fanv2(this.config.name);
-    this.fanService.getCharacteristic(this.hap.Characteristic.Active)
-      .onGet(this.getActiveHandler.bind(this))
-      .onSet(this.setActiveHandler.bind(this));
-
     /* Battery Service */
     this.logger.debug('Initializing Battery Service');
     this.batteryService = new this.hap.Service.Battery();
@@ -46,6 +40,20 @@ class CleanmatePlugin implements AccessoryPlugin {
       .onGet(this.getBatteryLevelHandler.bind(this));
     this.batteryService.getCharacteristic(this.hap.Characteristic.ChargingState)
       .onGet(this.getChargingStateHandler.bind(this));
+
+    /* Fan Service */
+    this.logger.debug('Initializing Fan Service');
+    this.fanService = new this.hap.Service.Fanv2(this.config.name);
+    this.fanService.getCharacteristic(this.hap.Characteristic.Active)
+      .onGet(this.getActiveHandler.bind(this))
+      .onSet(this.setActiveHandler.bind(this));
+
+    /* Switch Service */
+    this.logger.debug('Initializing Switch Service');
+    this.switchService = new this.hap.Service.Switch(this.config.name);
+    this.switchService.getCharacteristic(this.hap.Characteristic.On)
+      .onGet(this.getPauseHandler.bind(this))
+      .onSet(this.setPauseHandler.bind(this));
 
     /* Setup cleanmate service */
     this.cleanmateService = new CleanmateService(this.config.ipAddress, this.config.authCode);
@@ -64,8 +72,9 @@ class CleanmatePlugin implements AccessoryPlugin {
   getServices() {
     return [
       this.informationService,
-      this.fanService,
       this.batteryService,
+      this.fanService,
+      this.switchService,
     ];
   }
 
@@ -74,20 +83,6 @@ class CleanmatePlugin implements AccessoryPlugin {
   /* Get the firmwate revision of the robot */
   getFirmwareRevision(): CharacteristicValue {
     return this.cleanmateService.status.version ?? '1.0';
-  }
-
-  /* --- Fan Service --- */
-
-  /* Get active/cleaning status of the robot */
-  getActiveHandler(): CharacteristicValue {
-    const active = this.cleanmateService.status.workMode === WorkMode.Cleaning;
-
-    return active ? this.hap.Characteristic.Active.ACTIVE : this.hap.Characteristic.Active.INACTIVE;
-  }
-
-  /* Set active/cleaning status of the robot */
-  setActiveHandler(value: CharacteristicValue) {
-    value === this.hap.Characteristic.Active.ACTIVE ? this.cleanmateService.start() : this.cleanmateService.pause();
   }
 
   /* --- Battery Service --- */
@@ -105,8 +100,35 @@ class CleanmatePlugin implements AccessoryPlugin {
 
   /* Get charging status of the robot */
   getChargingStateHandler(): CharacteristicValue {
-    const charging = this.cleanmateService.status.workMode === WorkMode.Charging;
+    const charging = this.cleanmateService.status.workState === WorkState.Charging;
     return charging ? this.hap.Characteristic.ChargingState.CHARGING : this.hap.Characteristic.ChargingState.NOT_CHARGING;
+  }
+
+  /* --- Fan Service --- */
+
+  /* Get active/cleaning status of the robot */
+  getActiveHandler(): CharacteristicValue {
+    const active = this.cleanmateService.status.workState === WorkState.Cleaning;
+
+    return active ? this.hap.Characteristic.Active.ACTIVE : this.hap.Characteristic.Active.INACTIVE;
+  }
+
+  /* Set active/cleaning status of the robot */
+  setActiveHandler(value: CharacteristicValue) {
+    value === this.hap.Characteristic.Active.ACTIVE ? this.cleanmateService.start() : this.cleanmateService.charge();
+  }
+
+  /* --- Switch Service --- */
+
+  /* Get active/cleaning status of the robot */
+  getPauseHandler(): CharacteristicValue {
+    const paused = this.cleanmateService.status.workState === WorkState.Paused;
+    return paused;
+  }
+
+  /* Set active/cleaning status of the robot */
+  setPauseHandler(value: CharacteristicValue) {
+    value ? this.cleanmateService.pause() : this.cleanmateService.start();
   }
 }
 

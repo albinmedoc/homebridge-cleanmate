@@ -1,16 +1,25 @@
 import CleanmateService from '../src/cleanmateService';
+import { MopMode, WorkMode } from '../src/types';
 
 const cleanmateService = new CleanmateService('192.168.86.248', '3592407072');
 
-setInterval(() => {
+/* setInterval(() => {
   cleanmateService.updateStatus().then(() => {
-    console.log(cleanmateService.status);
+    console.log(cleanmateService.latestStatusResponse);
   });
-}, 2000);
+}, 2000); */
 
 
-/* cleanmateService.start();
+/* cleanmateService.start(WorkMode.Silent);
 
 setTimeout(() => {
-  cleanmateService.end();
-}, 1000 * 15); */
+  cleanmateService.pause();
+}, 1000 * 6); */
+
+cleanmateService.setMopMode(MopMode.Low);
+setTimeout(() => {
+  cleanmateService.setMopMode(MopMode.Medium);
+  setTimeout(() => {
+    cleanmateService.setMopMode(MopMode.High);
+  }, 1000 * 6);
+}, 1000 * 6);

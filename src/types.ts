@@ -8,24 +8,30 @@ export interface Config extends AccessoryConfig {
 }
 
 export enum WorkMode {
-    Cleaning = 1,
-    Idle = 2,
-    Charging = 6,
-    Problem = 7
+    Intensive = 7,
+    Standard = 1,
+    Silent = 9
 }
 
 export enum WorkState {
-    Standard = 1,
-    Intensive = 7,
-    Silent = 9
+    Cleaning = 1,
+    Paused = 2,
+    Charging = 6,
+    Problem = 9
+}
+
+export enum MopMode {
+    High = 20,
+    Medium = 40,
+    Low = 60
 }
 
 export interface CleanmateStatus {
     batteryLevel?: number;
-    waterLevel?: number;
     version?: string;
     workMode?: WorkMode;
     workState?: WorkState;
+    mopMode?: MopMode;
 }
 
 export interface StatusResponse {
