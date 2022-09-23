@@ -12,6 +12,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   batteryService: Service;
   fanService: Service;
   switchService: Service;
+  occupancyService?: Service;
 
   cleanmateService: CleanmateService;
   lastStatus?: CleanmateStatus;
@@ -25,14 +26,12 @@ class CleanmatePlugin implements AccessoryPlugin {
     this.logger.debug('Cleanmate Plugin Loaded');
 
     /* Information Service */
-    this.logger.debug('Initializing Information Service');
     this.informationService = new this.hap.Service.AccessoryInformation();
     this.informationService.setCharacteristic(this.hap.Characteristic.Manufacturer, 'Cleanmate');
     this.informationService.getCharacteristic(this.hap.Characteristic.FirmwareRevision)
       .onGet(this.getFirmwareRevision.bind(this));
 
     /* Battery Service */
-    this.logger.debug('Initializing Battery Service');
     this.batteryService = new this.hap.Service.Battery();
     this.batteryService.getCharacteristic(this.hap.Characteristic.StatusLowBattery)
       .onGet(this.getLowBatteryHandler.bind(this));
@@ -42,7 +41,6 @@ class CleanmatePlugin implements AccessoryPlugin {
       .onGet(this.getChargingStateHandler.bind(this));
 
     /* Fan Service */
-    this.logger.debug('Initializing Fan Service');
     this.fanService = new this.hap.Service.Fanv2(this.config.name);
     this.fanService.getCharacteristic(this.hap.Characteristic.Active)
       .onGet(this.getActiveHandler.bind(this))
@@ -57,6 +55,13 @@ class CleanmatePlugin implements AccessoryPlugin {
     this.switchService.getCharacteristic(this.hap.Characteristic.On)
       .onGet(this.getPauseHandler.bind(this))
       .onSet(this.setPauseHandler.bind(this));
+
+    /* Occupancy Service */
+    if(this.config.occupancySensor.enable){
+      this.occupancyService = new this.hap.Service.OccupancySensor(this.config.name);
+      this.occupancyService.getCharacteristic(this.hap.Characteristic.OccupancyDetected)
+        .onGet(this.getOccupancyHandler.bind(this));
+    }
 
     /* Setup cleanmate service */
     this.cleanmateService = new CleanmateService(this.config.ipAddress, this.config.authCode);
@@ -86,13 +91,25 @@ class CleanmatePlugin implements AccessoryPlugin {
     if(status.workState && this.lastStatus?.workState !== status.workState) {
       const charging = status.workState === WorkState.Charging;
       this.batteryService.updateCharacteristic(
-        this.hap.Characteristic.ChargingState, charging ?
+        this.hap.Characteristic.ChargingState,
+        charging ?
           this.hap.Characteristic.ChargingState.CHARGING :
           this.hap.Characteristic.ChargingState.NOT_CHARGING,
       );
+
+      const docked = this.config.occupancySensor.inverted ? !charging : charging;
+
+      this.occupancyService?.updateCharacteristic(
+        this.hap.Characteristic.OccupancyDetected,
+        docked ?
+          this.hap.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED :
+          this.hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED,
+      );
+
       const active = status.workState === WorkState.Charging;
       this.fanService.updateCharacteristic(
-        this.hap.Characteristic.Active, active ?
+        this.hap.Characteristic.Active,
+        active ?
           this.hap.Characteristic.Active.ACTIVE :
           this.hap.Characteristic.Active.INACTIVE,
       );
@@ -113,7 +130,8 @@ class CleanmatePlugin implements AccessoryPlugin {
       this.batteryService,
       this.fanService,
       this.switchService,
-    ];
+      this.occupancyService,
+    ].filter((service) => service !== undefined) as Service[];
   }
 
   getSpeedByMode(workMode: WorkMode) {
@@ -205,6 +223,20 @@ class CleanmatePlugin implements AccessoryPlugin {
   setPauseHandler(value: CharacteristicValue) {
     value ? this.cleanmateService.pause() : this.cleanmateService.start();
   }
+
+  /* --- Occupancy Service --- */
+
+  /* Get dock state of robot */
+  getOccupancyHandler(): CharacteristicValue {
+    let docked = this.cleanmateService.status.workState === WorkState.Charging;
+    if(this.config.occupancySensor.inverted){
+      docked = !docked;
+    }
+    return docked ?
+      this.hap.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED :
+      this.hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
+  }
+
 }
 
 export default CleanmatePlugin;

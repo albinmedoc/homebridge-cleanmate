@@ -13,32 +13,49 @@
       },
       "ipAddress": {
         "title": "Ip adress",
+        "description": "Ip adress of the robot. Make sure it has a static ip",
         "type": "string",
         "required": true,
-        "format": "ipv4",
-        "description": "Ip adress of the robot. Make sure it has a static ip"
+        "format": "ipv4"
       },
       "authCode": {
         "title": "Authentication code",
+        "description": "The authentication code is 32 digits",
         "type": "string",
         "required": true,
         "minLength": 10,
-        "maxLength": 10,
-        "description": "The authentication code is 32 digits"
+        "maxLength": 10
       },
       "pollInterval": {
         "title": "Poll interval",
+        "description": "How often the status should be updated (in seconds)",
         "type": "number",
         "required": true,
-        "default": 30,
-        "description": "How often the status should be updated (in seconds)"
+        "default": 30
       },
       "lowBatteryPercentage": {
         "title": "Low battery percentage",
+        "description": "When should the robot report low battery",
         "type": "number",
         "required": true,
-        "default": 15,
-        "description": "When should the robot report low battery"
+        "default": 15
+      },
+      "occupancySensor": {
+        "title": "Occupancy Sensor",
+        "type": "object",
+        "properties": {
+          "enable": {
+            "title": "Enable",
+            "type": "boolean",
+            "default": true
+          },
+          "inverted": {
+            "title": "Inverted",
+            "type": "boolean",
+            "default": false,
+            "description": "Activate when robot is at dock"
+          }
+        }
       }
     }
   }

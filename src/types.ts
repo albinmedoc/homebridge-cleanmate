@@ -6,6 +6,10 @@ export interface Config extends AccessoryConfig {
     authCode: string;
     pollInterval: number;
     lowBatteryPercentage: number;
+    occupancySensor: {
+        enable: boolean;
+        inverted: boolean;
+    };
 }
 
 export enum WorkMode {
