@@ -53,7 +53,10 @@
             "title": "Inverted",
             "type": "boolean",
             "default": false,
-            "description": "Activate when robot is at dock"
+            "description": "Activate when robot is at dock",
+            "condition": {
+                "functionBody": "return model.occupancySensor.enable === true;"
+            }
           }
         }
       }

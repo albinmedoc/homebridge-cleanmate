@@ -1,16 +1,20 @@
 import { AccessoryConfig } from 'homebridge';
 
-export interface Config extends AccessoryConfig {
+interface BaseConfig {
     name: string;
     ipAddress: string;
     authCode: string;
-    pollInterval: number;
-    lowBatteryPercentage: number;
-    occupancySensor: {
-        enable: boolean;
-        inverted: boolean;
+    pollInterval?: number;
+    lowBatteryPercentage?: number;
+    occupancySensor?: {
+        enable?: boolean;
+        inverted?: boolean;
     };
 }
+
+export interface Config extends AccessoryConfig, BaseConfig{}
+
+export interface PluginConfig extends AccessoryConfig, Required<BaseConfig>{}
 
 export enum WorkMode {
     Intensive = 7,
