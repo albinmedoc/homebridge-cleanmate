@@ -56,6 +56,9 @@ class CleanmatePlugin implements AccessoryPlugin {
     this.fanService.getCharacteristic(this.hap.Characteristic.RotationSpeed)
       .onGet(this.getSpeedHandler.bind(this))
       .onSet(this.setSpeedHandler.bind(this));
+    this.fanService.getCharacteristic(this.hap.Characteristic.RotationDirection)
+      .onGet(this.getRotationHandler.bind(this))
+      .onSet(this.setRotationHandler.bind(this));
 
     /* Switch Service */
     this.logger.debug('Initializing Switch Service');
@@ -203,6 +206,19 @@ class CleanmatePlugin implements AccessoryPlugin {
       return 0;
     }
     return this.getSpeedByMode(this.cleanmateService.status.workMode);
+  }
+
+  getRotationHandler(): CharacteristicValue {
+    const clockwise = this.cleanmateService.status.mopMode === this.config.clockwiseMode;
+    return clockwise ? this.hap.Characteristic.RotationDirection.CLOCKWISE : this.hap.Characteristic.RotationDirection.COUNTER_CLOCKWISE;
+  }
+
+  setRotationHandler(value: CharacteristicValue) {
+    const mopMode = value === this.hap.Characteristic.RotationDirection.CLOCKWISE ?
+      this.config.clockwiseMode :
+      this.config.counterClockwiseMode;
+
+    this.cleanmateService.setMopMode(mopMode);
   }
 
   /* Get speed level of the fan */

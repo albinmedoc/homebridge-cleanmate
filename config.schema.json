@@ -40,6 +40,30 @@
         "required": true,
         "default": 15
       },
+      "clockwiseMode": {
+        "title": "Clockwise mode",
+        "type": "number",
+        "oneOf": [
+            { "title": "Low", "enum": ["60"] },
+            { "title": "Medium", "enum": ["40"] },
+            { "title": "High", "enum": ["20"] }
+        ],
+        "required": true,
+        "default": 20,
+        "description": "Which mop mode to use when clockwise is used"
+      },
+      "counterClockwiseMode": {
+        "title": "Counter clockwise mode",
+        "type": "number",
+        "oneOf": [
+            { "title": "Low", "enum": ["60"] },
+            { "title": "Medium", "enum": ["40"] },
+            { "title": "High", "enum": ["20"] }
+        ],
+        "required": true,
+        "default": 60,
+        "description": "Which mop mode to use when counter clockwise is used"
+      },
       "occupancySensor": {
         "title": "Occupancy Sensor",
         "type": "object",
