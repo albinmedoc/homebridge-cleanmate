@@ -1,4 +1,4 @@
-import { AccessoryPlugin, Logging, API, Service, HAP, CharacteristicValue } from 'homebridge';
+import { AccessoryPlugin, Logging, API, Service, HAP, CharacteristicValue, AccessoryConfig } from 'homebridge';
 import CleanmateService from './cleanmateService';
 import { CleanmateStatus, Config, PluginConfig, WorkMode, WorkState } from './types';
 
@@ -17,10 +17,10 @@ class CleanmatePlugin implements AccessoryPlugin {
   cleanmateService: CleanmateService;
   lastStatus?: CleanmateStatus;
 
-  constructor(logger: Logging, config: Config, api: API) {
+  constructor(logger: Logging, config: AccessoryConfig, api: API) {
     this.logger = logger;
     this.config = {
-      ...config,
+      ...config as Config,
       pollInterval: config.pollInterval ?? 30,
       lowBatteryPercentage: config.lowBatteryPercentage ?? 15,
       occupancySensor: {
