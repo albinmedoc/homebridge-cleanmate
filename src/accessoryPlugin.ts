@@ -12,6 +12,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   batteryService: Service;
   fanService: Service;
   switchService: Service;
+  motionService?: Service;
   occupancyService?: Service;
 
   cleanmateService: CleanmateService;
@@ -23,6 +24,7 @@ class CleanmatePlugin implements AccessoryPlugin {
       ...config as Config,
       pollInterval: config.pollInterval ?? 30,
       lowBatteryPercentage: config.lowBatteryPercentage ?? 15,
+      motionSensor: config.motionSensor ?? true,
       occupancySensor: {
         enable: config.occupancySensor?.enable ?? true,
         inverted: config.occupancySensor?.inverted ?? false,
@@ -30,8 +32,6 @@ class CleanmatePlugin implements AccessoryPlugin {
     };
     this.api = api;
     this.hap = api.hap;
-
-    this.logger.debug('Cleanmate Plugin Loaded');
 
     /* Information Service */
     this.informationService = new this.hap.Service.AccessoryInformation();
@@ -61,11 +61,17 @@ class CleanmatePlugin implements AccessoryPlugin {
       .onSet(this.setRotationHandler.bind(this));
 
     /* Switch Service */
-    this.logger.debug('Initializing Switch Service');
     this.switchService = new this.hap.Service.Switch(this.config.name);
     this.switchService.getCharacteristic(this.hap.Characteristic.On)
       .onGet(this.getPauseHandler.bind(this))
       .onSet(this.setPauseHandler.bind(this));
+
+    /* Occupancy Service */
+    if(this.config.motionSensor){
+      this.motionService = new this.hap.Service.MotionSensor(this.config.name);
+      this.motionService.getCharacteristic(this.hap.Characteristic.MotionDetected)
+        .onGet(this.getMotionHandler.bind(this));
+    }
 
     /* Occupancy Service */
     if(this.config.occupancySensor.enable){
@@ -108,8 +114,10 @@ class CleanmatePlugin implements AccessoryPlugin {
           this.hap.Characteristic.ChargingState.NOT_CHARGING,
       );
 
-      const docked = this.config.occupancySensor.inverted ? !charging : charging;
+      const hasProblem = status.workState === WorkState.Problem;
+      this.motionService?.updateCharacteristic(this.hap.Characteristic.OccupancyDetected, hasProblem);
 
+      const docked = this.config.occupancySensor.inverted ? !charging : charging;
       this.occupancyService?.updateCharacteristic(
         this.hap.Characteristic.OccupancyDetected,
         docked ?
@@ -133,16 +141,6 @@ class CleanmatePlugin implements AccessoryPlugin {
     }
 
     this.lastStatus = status;
-  }
-
-  getServices() {
-    return [
-      this.informationService,
-      this.batteryService,
-      this.fanService,
-      this.switchService,
-      this.occupancyService,
-    ].filter((service) => service !== undefined) as Service[];
   }
 
   getSpeedByMode(workMode: WorkMode) {
@@ -248,6 +246,14 @@ class CleanmatePlugin implements AccessoryPlugin {
     value ? this.cleanmateService.pause() : this.cleanmateService.start();
   }
 
+  /* --- Motion Service --- */
+
+  /* Get problem state of robot */
+  getMotionHandler(): CharacteristicValue {
+    const hasProblem = this.cleanmateService.status.workState === WorkState.Problem;
+    return hasProblem;
+  }
+
   /* --- Occupancy Service --- */
 
   /* Get dock state of robot */
@@ -261,6 +267,17 @@ class CleanmatePlugin implements AccessoryPlugin {
       this.hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
   }
 
+  /* Get the active services */
+  getServices() {
+    return [
+      this.informationService,
+      this.batteryService,
+      this.fanService,
+      this.switchService,
+      this.motionService,
+      this.occupancyService,
+    ].filter((service) => service !== undefined) as Service[];
+  }
 }
 
 export default CleanmatePlugin;

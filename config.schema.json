@@ -64,6 +64,12 @@
         "default": 60,
         "description": "Which mop mode to use when counter clockwise is used"
       },
+      "motionSensor": {
+        "title": "Motion sensor",
+        "type": "boolean",
+        "default": true,
+        "description": "Add a motion sensor that triggers when the robot has a problem"
+      },
       "occupancySensor": {
         "title": "Occupancy Sensor",
         "type": "object",
@@ -71,7 +77,8 @@
           "enable": {
             "title": "Enable",
             "type": "boolean",
-            "default": true
+            "default": true,
+            "description": "Add a occupancy sensor that will represent if the robot is at dock"
           },
           "inverted": {
             "title": "Inverted",

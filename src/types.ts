@@ -8,6 +8,7 @@ interface BaseConfig {
     lowBatteryPercentage?: number;
     clockwiseMode: MopMode;
     counterClockwiseMode: MopMode;
+    motionSensor?: boolean;
     occupancySensor?: {
         enable?: boolean;
         inverted?: boolean;
