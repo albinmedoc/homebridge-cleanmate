@@ -20,7 +20,7 @@
       },
       "authCode": {
         "title": "Authentication code",
-        "description": "The authentication code is 32 digits",
+        "description": "The authentication code is 10 digits",
         "type": "string",
         "required": true,
         "minLength": 10,

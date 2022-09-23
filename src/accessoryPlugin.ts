@@ -1,6 +1,6 @@
 import { AccessoryPlugin, Logging, API, Service, HAP, CharacteristicValue, AccessoryConfig } from 'homebridge';
 import CleanmateService from './cleanmateService';
-import { CleanmateStatus, Config, PluginConfig, WorkMode, WorkState } from './types';
+import { CleanmateStatus, Config, MopMode, PluginConfig, WorkMode, WorkState } from './types';
 
 class CleanmatePlugin implements AccessoryPlugin {
   logger: Logging;
@@ -24,6 +24,8 @@ class CleanmatePlugin implements AccessoryPlugin {
       ...config as Config,
       pollInterval: config.pollInterval ?? 30,
       lowBatteryPercentage: config.lowBatteryPercentage ?? 15,
+      clockwiseMode: config.clockwiseMode ?? MopMode.High,
+      counterClockwiseMode: config.counterClockwiseMode ?? MopMode.Low,
       motionSensor: config.motionSensor ?? true,
       occupancySensor: {
         enable: config.occupancySensor?.enable ?? true,
@@ -263,8 +265,8 @@ class CleanmatePlugin implements AccessoryPlugin {
       docked = !docked;
     }
     return docked ?
-      this.hap.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED :
-      this.hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED;
+      this.hap.Characteristic.OccupancyDetected.OCCUPANCY_DETECTED :
+      this.hap.Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED;
   }
 
   /* Get the active services */

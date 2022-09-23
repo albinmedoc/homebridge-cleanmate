@@ -6,8 +6,8 @@ interface BaseConfig {
     authCode: string;
     pollInterval?: number;
     lowBatteryPercentage?: number;
-    clockwiseMode: MopMode;
-    counterClockwiseMode: MopMode;
+    clockwiseMode?: MopMode;
+    counterClockwiseMode?: MopMode;
     motionSensor?: boolean;
     occupancySensor?: {
         enable?: boolean;
