@@ -28,14 +28,17 @@ class CleanmatePlugin implements AccessoryPlugin {
       counterClockwiseMode: config.counterClockwiseMode ?? MopMode.Low,
       pauseSwitch: {
         enable: config.pauseSwitch?.enable ?? true,
+        name: config.pauseSwitch?.name ?? 'Pause',
         inverted: config.pauseSwitch?.enable ?? false,
       },
       motionSensor: {
         enable: config.motionSensor?.enable ?? true,
+        name: config.motionSensor?.name ?? 'Problem',
         inverted: config.motionSensor?.enable ?? false,
       },
       occupancySensor: {
         enable: config.occupancySensor?.enable ?? true,
+        name: config.occupancySensor?.name ?? 'Docked',
         inverted: config.occupancySensor?.inverted ?? false,
       },
     };
@@ -71,7 +74,7 @@ class CleanmatePlugin implements AccessoryPlugin {
 
     /* Switch Service */
     if (this.config.pauseSwitch.enable) {
-      this.switchService = new this.hap.Service.Switch(this.config.name);
+      this.switchService = new this.hap.Service.Switch(`${this.config.name} - ${this.config.pauseSwitch.name}`);
       this.switchService.getCharacteristic(this.hap.Characteristic.On)
         .onGet(this.getPauseHandler.bind(this))
         .onSet(this.setPauseHandler.bind(this));
@@ -79,14 +82,14 @@ class CleanmatePlugin implements AccessoryPlugin {
 
     /* Occupancy Service */
     if (this.config.motionSensor.enable) {
-      this.motionService = new this.hap.Service.MotionSensor(this.config.name);
+      this.motionService = new this.hap.Service.MotionSensor(`${this.config.name} - ${this.config.motionSensor.name}`);
       this.motionService.getCharacteristic(this.hap.Characteristic.MotionDetected)
         .onGet(this.getMotionHandler.bind(this));
     }
 
     /* Occupancy Service */
     if (this.config.occupancySensor.enable) {
-      this.occupancyService = new this.hap.Service.OccupancySensor(this.config.name);
+      this.occupancyService = new this.hap.Service.OccupancySensor(`${this.config.name} - ${this.config.occupancySensor.name}`);
       this.occupancyService.getCharacteristic(this.hap.Characteristic.OccupancyDetected)
         .onGet(this.getOccupancyHandler.bind(this));
     }

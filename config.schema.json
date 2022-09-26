@@ -102,6 +102,15 @@
                "default": true,
                "description": "Add a switch that pauses the robot on enabled and continues when disabled"
             },
+            "name": {
+               "title": "Name",
+               "type": "string",
+               "placeholder": "Pause",
+               "description": "The name of the switch",
+               "condition": {
+                  "functionBody": "return model.pauseSwitch.enable === true;"
+               }
+            },
             "inverted": {
                "title": "Inverted",
                "type": "boolean",
@@ -123,6 +132,15 @@
                "default": true,
                "description": "Add a motion sensor that triggers when the robot has a problem"
             },
+            "name": {
+               "title": "Name",
+               "type": "string",
+               "placeholder": "Problem",
+               "description": "The name of the motion sensor",
+               "condition": {
+                  "functionBody": "return model.motionSensor.enable === true;"
+               }
+            },
             "inverted": {
                "title": "Inverted",
                "type": "boolean",
@@ -143,6 +161,15 @@
                "type": "boolean",
                "default": true,
                "description": "Add a occupancy sensor that will represent if the robot is at dock"
+            },
+            "name": {
+               "title": "Name",
+               "type": "string",
+               "placeholder": "Docked",
+               "description": "The name of the occupancy sensor ",
+               "condition": {
+                  "functionBody": "return model.occupancySensor.enable === true;"
+               }
             },
             "inverted": {
                "title": "Inverted",
@@ -188,6 +215,7 @@
                "expanded": true,
                "items": [
                   "pauseSwitch.enable",
+                  "pauseSwitch.name",
                   "pauseSwitch.inverted"
                ]
             },
@@ -199,6 +227,7 @@
                "expanded": true,
                "items": [
                   "motionSensor.enable",
+                  "motionSensor.name",
                   "motionSensor.inverted"
                ]
             },
@@ -210,6 +239,7 @@
                "expanded": true,
                "items": [
                   "occupancySensor.enable",
+                  "occupancySensor.name",
                   "occupancySensor.inverted"
                ]
             }

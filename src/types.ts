@@ -1,5 +1,9 @@
 import { AccessoryConfig } from 'homebridge';
 
+type RecursiveRequired<T> = {
+    [P in keyof T]-?: RecursiveRequired<T[P]>;
+};
+
 interface BaseConfig {
     name: string;
     ipAddress: string;
@@ -10,21 +14,24 @@ interface BaseConfig {
     counterClockwiseMode?: MopMode;
     pauseSwitch?: {
         enable?: boolean;
+        name?: string;
         inverted?: boolean;
     };
     motionSensor?: {
         enable?: boolean;
+        name?: string;
         inverted?: boolean;
     };
     occupancySensor?: {
         enable?: boolean;
+        name?: string;
         inverted?: boolean;
     };
 }
 
-export interface Config extends AccessoryConfig, BaseConfig{}
+export interface Config extends AccessoryConfig, BaseConfig { }
 
-export interface PluginConfig extends AccessoryConfig, Required<BaseConfig>{}
+export interface PluginConfig extends AccessoryConfig, RecursiveRequired<BaseConfig> { }
 
 export enum WorkMode {
     Intensive = 7,
