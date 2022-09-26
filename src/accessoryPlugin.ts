@@ -11,7 +11,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   informationService: Service;
   batteryService: Service;
   fanService: Service;
-  switchService: Service;
+  switchService?: Service;
   motionService?: Service;
   occupancyService?: Service;
 
@@ -26,7 +26,14 @@ class CleanmatePlugin implements AccessoryPlugin {
       lowBatteryPercentage: config.lowBatteryPercentage ?? 15,
       clockwiseMode: config.clockwiseMode ?? MopMode.High,
       counterClockwiseMode: config.counterClockwiseMode ?? MopMode.Low,
-      motionSensor: config.motionSensor ?? true,
+      pauseSwitch: {
+        enable: config.pauseSwitch?.enable ?? true,
+        inverted: config.pauseSwitch?.enable ?? false,
+      },
+      motionSensor: {
+        enable: config.motionSensor?.enable ?? true,
+        inverted: config.motionSensor?.enable ?? false,
+      },
       occupancySensor: {
         enable: config.occupancySensor?.enable ?? true,
         inverted: config.occupancySensor?.inverted ?? false,
@@ -63,20 +70,22 @@ class CleanmatePlugin implements AccessoryPlugin {
       .onSet(this.setRotationHandler.bind(this));
 
     /* Switch Service */
-    this.switchService = new this.hap.Service.Switch(this.config.name);
-    this.switchService.getCharacteristic(this.hap.Characteristic.On)
-      .onGet(this.getPauseHandler.bind(this))
-      .onSet(this.setPauseHandler.bind(this));
+    if (this.config.pauseSwitch.enable) {
+      this.switchService = new this.hap.Service.Switch(this.config.name);
+      this.switchService.getCharacteristic(this.hap.Characteristic.On)
+        .onGet(this.getPauseHandler.bind(this))
+        .onSet(this.setPauseHandler.bind(this));
+    }
 
     /* Occupancy Service */
-    if(this.config.motionSensor){
+    if (this.config.motionSensor.enable) {
       this.motionService = new this.hap.Service.MotionSensor(this.config.name);
       this.motionService.getCharacteristic(this.hap.Characteristic.MotionDetected)
         .onGet(this.getMotionHandler.bind(this));
     }
 
     /* Occupancy Service */
-    if(this.config.occupancySensor.enable){
+    if (this.config.occupancySensor.enable) {
       this.occupancyService = new this.hap.Service.OccupancySensor(this.config.name);
       this.occupancyService.getCharacteristic(this.hap.Characteristic.OccupancyDetected)
         .onGet(this.getOccupancyHandler.bind(this));
@@ -97,17 +106,17 @@ class CleanmatePlugin implements AccessoryPlugin {
   }
 
   onStatusUpdate(status: CleanmateStatus) {
-    if(status.version && this.lastStatus?.version !== status.version) {
+    if (status.version && this.lastStatus?.version !== status.version) {
       this.informationService.updateCharacteristic(this.hap.Characteristic.FirmwareRevision, status.version);
     }
-    if(status.batteryLevel && this.lastStatus?.batteryLevel !== status.batteryLevel) {
+    if (status.batteryLevel && this.lastStatus?.batteryLevel !== status.batteryLevel) {
       this.batteryService.updateCharacteristic(this.hap.Characteristic.BatteryLevel, status.batteryLevel);
       this.batteryService.updateCharacteristic(
         this.hap.Characteristic.StatusLowBattery,
         status.batteryLevel <= this.config.lowBatteryPercentage,
       );
     }
-    if(status.workState && this.lastStatus?.workState !== status.workState) {
+    if (status.workState && this.lastStatus?.workState !== status.workState) {
       const charging = status.workState === WorkState.Charging;
       this.batteryService.updateCharacteristic(
         this.hap.Characteristic.ChargingState,
@@ -136,9 +145,9 @@ class CleanmatePlugin implements AccessoryPlugin {
       );
 
       const paused = status.workState === WorkState.Paused;
-      this.switchService.updateCharacteristic(this.hap.Characteristic.On, paused);
+      this.switchService?.updateCharacteristic(this.hap.Characteristic.On, paused);
     }
-    if(status.workMode && this.lastStatus?.workMode !== status.workMode) {
+    if (status.workMode && this.lastStatus?.workMode !== status.workMode) {
       this.fanService.updateCharacteristic(this.hap.Characteristic.RotationSpeed, this.getSpeedByMode(status.workMode));
     }
 
@@ -146,7 +155,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   }
 
   getSpeedByMode(workMode: WorkMode) {
-    switch(workMode) {
+    switch (workMode) {
       case WorkMode.Silent:
         return 17;
       case WorkMode.Standard:
@@ -202,7 +211,7 @@ class CleanmatePlugin implements AccessoryPlugin {
 
   /* Set speed level of the fan */
   getSpeedHandler(): CharacteristicValue {
-    if(this.cleanmateService.status.workState !== WorkState.Cleaning || !this.cleanmateService.status.workMode){
+    if (this.cleanmateService.status.workState !== WorkState.Cleaning || !this.cleanmateService.status.workMode) {
       return 0;
     }
     return this.getSpeedByMode(this.cleanmateService.status.workMode);
@@ -223,10 +232,10 @@ class CleanmatePlugin implements AccessoryPlugin {
 
   /* Get speed level of the fan */
   setSpeedHandler(value: CharacteristicValue) {
-    if(value === 0) {
+    if (value === 0) {
       this.cleanmateService.pause();
       // Pause
-    } else if(value < 33) {
+    } else if (value < 33) {
       this.cleanmateService.start(WorkMode.Silent);
     } else if (value < 66) {
       this.cleanmateService.start(WorkMode.Standard);
@@ -240,12 +249,13 @@ class CleanmatePlugin implements AccessoryPlugin {
   /* Get active/cleaning status of the robot */
   getPauseHandler(): CharacteristicValue {
     const paused = this.cleanmateService.status.workState === WorkState.Paused;
-    return paused;
+    return this.config.pauseSwitch.inverted ? !paused : paused;
   }
 
   /* Set active/cleaning status of the robot */
   setPauseHandler(value: CharacteristicValue) {
-    value ? this.cleanmateService.pause() : this.cleanmateService.start();
+    const pause = this.config.pauseSwitch.inverted ? !value : !!value;
+    pause ? this.cleanmateService.pause() : this.cleanmateService.start();
   }
 
   /* --- Motion Service --- */
@@ -253,7 +263,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   /* Get problem state of robot */
   getMotionHandler(): CharacteristicValue {
     const hasProblem = this.cleanmateService.status.workState === WorkState.Problem;
-    return hasProblem;
+    return this.config.motionSensor.inverted ? !hasProblem : hasProblem;
   }
 
   /* --- Occupancy Service --- */
@@ -261,7 +271,7 @@ class CleanmatePlugin implements AccessoryPlugin {
   /* Get dock state of robot */
   getOccupancyHandler(): CharacteristicValue {
     let docked = this.cleanmateService.status.workState === WorkState.Charging;
-    if(this.config.occupancySensor.inverted){
+    if (this.config.occupancySensor.inverted) {
       docked = !docked;
     }
     return docked ?

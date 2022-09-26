@@ -1,96 +1,219 @@
 {
-  "pluginAlias": "Cleanmate",
-  "pluginType": "accessory",
-  "singular": false,
-  "schema": {
-    "type": "object",
-    "properties": {
+   "pluginAlias": "Cleanmate",
+   "pluginType": "accessory",
+   "singular": false,
+   "schema": {
       "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Cleanmate robot"
+         "title": "Name",
+         "type": "string",
+         "required": true,
+         "default": "Cleanmate robot"
       },
       "ipAddress": {
-        "title": "Ip adress",
-        "description": "Ip adress of the robot. Make sure it has a static ip",
-        "type": "string",
-        "required": true,
-        "format": "ipv4"
+         "title": "Ip adress",
+         "description": "Ip adress of the robot. Make sure it has a static ip",
+         "type": "string",
+         "required": true,
+         "format": "ipv4"
       },
       "authCode": {
-        "title": "Authentication code",
-        "description": "The authentication code is 10 digits",
-        "type": "string",
-        "required": true,
-        "minLength": 10,
-        "maxLength": 10
+         "title": "Authentication code",
+         "description": "<a href='https://github.com/albinmedoc/homebridge-cleanmate#how-to-get-the-authentication-code' target='_blank'>Follow this tutorial</a> to find your authentication.</p>",
+         "type": "string",
+         "required": true,
+         "minLength": 10,
+         "maxLength": 10
       },
       "pollInterval": {
-        "title": "Poll interval",
-        "description": "How often the status should be updated (in seconds)",
-        "type": "number",
-        "required": true,
-        "default": 30
+         "title": "Poll interval",
+         "description": "How often the status should be updated (in seconds)",
+         "type": "number",
+         "required": true,
+         "default": 30
       },
       "lowBatteryPercentage": {
-        "title": "Low battery percentage",
-        "description": "When should the robot report low battery",
-        "type": "number",
-        "required": true,
-        "default": 15
+         "title": "Low battery percentage",
+         "description": "When should the robot report low battery",
+         "type": "number",
+         "required": true,
+         "default": 15
       },
       "clockwiseMode": {
-        "title": "Clockwise mode",
-        "type": "number",
-        "oneOf": [
-            { "title": "Low", "enum": ["60"] },
-            { "title": "Medium", "enum": ["40"] },
-            { "title": "High", "enum": ["20"] }
-        ],
-        "required": true,
-        "default": 20,
-        "description": "Which mop mode to use when clockwise is used"
+         "title": "Clockwise mode",
+         "type": "number",
+         "oneOf": [
+            {
+               "title": "Low",
+               "enum": [
+                  "60"
+               ]
+            },
+            {
+               "title": "Medium",
+               "enum": [
+                  "40"
+               ]
+            },
+            {
+               "title": "High",
+               "enum": [
+                  "20"
+               ]
+            }
+         ],
+         "required": true,
+         "default": 20,
+         "description": "Which mop mode to use when clockwise is used"
       },
       "counterClockwiseMode": {
-        "title": "Counter clockwise mode",
-        "type": "number",
-        "oneOf": [
-            { "title": "Low", "enum": ["60"] },
-            { "title": "Medium", "enum": ["40"] },
-            { "title": "High", "enum": ["20"] }
-        ],
-        "required": true,
-        "default": 60,
-        "description": "Which mop mode to use when counter clockwise is used"
+         "title": "Counter clockwise mode",
+         "type": "number",
+         "oneOf": [
+            {
+               "title": "Low",
+               "enum": [
+                  "60"
+               ]
+            },
+            {
+               "title": "Medium",
+               "enum": [
+                  "40"
+               ]
+            },
+            {
+               "title": "High",
+               "enum": [
+                  "20"
+               ]
+            }
+         ],
+         "required": true,
+         "default": 60,
+         "description": "Which mop mode to use when counter clockwise is used"
+      },
+      "pauseSwitch": {
+         "title": "Pause switch",
+         "type": "object",
+         "properties": {
+            "enable": {
+               "title": "Enable",
+               "type": "boolean",
+               "default": true,
+               "description": "Add a switch that pauses the robot on enabled and continues when disabled"
+            },
+            "inverted": {
+               "title": "Inverted",
+               "type": "boolean",
+               "default": false,
+               "description": "Pause on disabled and continue on enabled",
+               "condition": {
+                  "functionBody": "return model.pauseSwitch.enable === true;"
+               }
+            }
+         }
       },
       "motionSensor": {
-        "title": "Motion sensor",
-        "type": "boolean",
-        "default": true,
-        "description": "Add a motion sensor that triggers when the robot has a problem"
+         "title": "Motion Sensor",
+         "type": "object",
+         "properties": {
+            "enable": {
+               "title": "Enable",
+               "type": "boolean",
+               "default": true,
+               "description": "Add a motion sensor that triggers when the robot has a problem"
+            },
+            "inverted": {
+               "title": "Inverted",
+               "type": "boolean",
+               "default": false,
+               "description": "Activated when the robot not having a problem",
+               "condition": {
+                  "functionBody": "return model.motionSensor.enable === true;"
+               }
+            }
+         }
       },
       "occupancySensor": {
-        "title": "Occupancy Sensor",
-        "type": "object",
-        "properties": {
-          "enable": {
-            "title": "Enable",
-            "type": "boolean",
-            "default": true,
-            "description": "Add a occupancy sensor that will represent if the robot is at dock"
-          },
-          "inverted": {
-            "title": "Inverted",
-            "type": "boolean",
-            "default": false,
-            "description": "Activate when robot is at dock",
-            "condition": {
-                "functionBody": "return model.occupancySensor.enable === true;"
+         "title": "Occupancy Sensor",
+         "type": "object",
+         "properties": {
+            "enable": {
+               "title": "Enable",
+               "type": "boolean",
+               "default": true,
+               "description": "Add a occupancy sensor that will represent if the robot is at dock"
+            },
+            "inverted": {
+               "title": "Inverted",
+               "type": "boolean",
+               "default": false,
+               "description": "Activate when robot is at dock",
+               "condition": {
+                  "functionBody": "return model.occupancySensor.enable === true;"
+               }
             }
-          }
-        }
+         }
       }
-    }
-  }
+   },
+   "layout": [
+      "name",
+      "ipAddress",
+      "authCode",
+      {
+         "key": "advanced",
+         "type": "section",
+         "title": "Advanced Settings",
+         "expandable": true,
+         "expanded": false,
+         "items": [
+            "pollInterval",
+            "lowBatteryPercentage",
+            {
+               "key": "mop",
+               "type": "section",
+               "title": "Mop settings",
+               "expandable": true,
+               "expanded": true,
+               "items": [
+                  "clockwiseMode",
+                  "counterClockwiseMode"
+               ]
+            },
+            {
+               "key": "pauseSwitch",
+               "type": "section",
+               "title": "Pause switch",
+               "expandable": true,
+               "expanded": true,
+               "items": [
+                  "pauseSwitch.enable",
+                  "pauseSwitch.inverted"
+               ]
+            },
+            {
+               "key": "motionSensor",
+               "type": "section",
+               "title": "Motion sensor",
+               "expandable": true,
+               "expanded": true,
+               "items": [
+                  "motionSensor.enable",
+                  "motionSensor.inverted"
+               ]
+            },
+            {
+               "key": "occupancySensor",
+               "type": "section",
+               "title": "Occupancy sensor",
+               "expandable": true,
+               "expanded": true,
+               "items": [
+                  "occupancySensor.enable",
+                  "occupancySensor.inverted"
+               ]
+            }
+         ]
+      }
+   ]
 }
