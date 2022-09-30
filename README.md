@@ -1,3 +1,7 @@
+[![GitHub last commit](https://img.shields.io/github/last-commit/albinmedoc/homebridge-cleanmate.svg)](https://github.com/albinmedoc/homebridge-cleanmate)
+[![npm](https://img.shields.io/npm/v/homebridge-cleanmate?label=npm%20package)](https://github.com/albinmedoc/homebridge-cleanmate)
+[![npm](https://img.shields.io/npm/dt/homebridge-cleanmate.svg)](https://www.npmjs.com/package/homebridge-cleanmate)
+
 <p align="center">
   <img src="assets/homebridge-cleanmate-logo.png" height="200px">
 </p>
