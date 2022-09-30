@@ -53,11 +53,11 @@ export enum MopMode {
 }
 
 export interface CleanmateStatus {
-    batteryLevel?: number;
-    version?: string;
-    workMode?: WorkMode;
-    workState?: WorkState;
-    mopMode?: MopMode;
+    batteryLevel: number;
+    version: string;
+    workMode: WorkMode;
+    workState: WorkState;
+    mopMode: MopMode;
 }
 
 export interface StatusResponse {
