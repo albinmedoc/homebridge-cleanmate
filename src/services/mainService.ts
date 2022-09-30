@@ -54,7 +54,11 @@ export default class MainService extends ServiceBase {
   }
 
   private setActiveState(value: CharacteristicValue): void {
-    value ? this.cleanmateService.start() : this.cleanmateService.pause();
+    if(value) {
+      this.cleanmateService.start();
+    }else {
+      this.cleanmateService.pause();
+    }
   }
 
   private getSpeedByWorkMode(workMode: WorkMode): number {

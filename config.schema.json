@@ -129,7 +129,7 @@
             "enable": {
                "title": "Enable",
                "type": "boolean",
-               "default": true,
+               "default": false,
                "description": "Add a motion sensor that triggers when the robot has a problem"
             },
             "name": {
@@ -159,7 +159,7 @@
             "enable": {
                "title": "Enable",
                "type": "boolean",
-               "default": true,
+               "default": false,
                "description": "Add a occupancy sensor that will represent if the robot is at dock"
             },
             "name": {

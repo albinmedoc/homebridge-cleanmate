@@ -30,7 +30,12 @@ export default class PauseSwitch extends ServiceBase {
 
   private setPauseState(value: CharacteristicValue): void {
     const pause = this.config.pauseSwitch.inverted ? !value : !!value;
-    pause ? this.cleanmateService.pause() : this.cleanmateService.start();
+    this.log.debug('Set pause', pause);
+    if(pause) {
+      this.cleanmateService.pause();
+    }else {
+      this.cleanmateService.start();
+    }
   }
 
   public get services(): Service[] {

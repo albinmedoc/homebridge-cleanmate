@@ -27,15 +27,15 @@ class CleanmatePlugin implements AccessoryPlugin {
       pauseSwitch: {
         enable: config.pauseSwitch?.enable ?? true,
         name: config.pauseSwitch?.name ?? 'Pause',
-        inverted: config.pauseSwitch?.enable ?? false,
+        inverted: config.pauseSwitch?.inverted ?? false,
       },
       motionSensor: {
-        enable: config.motionSensor?.enable ?? true,
+        enable: config.motionSensor?.enable ?? false,
         name: config.motionSensor?.name ?? 'Problem',
-        inverted: config.motionSensor?.enable ?? false,
+        inverted: config.motionSensor?.inverted ?? false,
       },
       occupancySensor: {
-        enable: config.occupancySensor?.enable ?? true,
+        enable: config.occupancySensor?.enable ?? false,
         name: config.occupancySensor?.name ?? 'Docked',
         inverted: config.occupancySensor?.inverted ?? false,
       },
