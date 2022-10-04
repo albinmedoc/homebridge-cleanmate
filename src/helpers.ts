@@ -14,15 +14,13 @@ const tryParseInt = (str: string) => {
   return int;
 };
 
-const stringifyRecord = (dict: Record<string, string | boolean | number>): Record<string, string> => {
-  Object.keys(dict).forEach((key) => {
-    let value = dict[key];
-    if(typeof value === 'boolean') {
-      value = value ? 1 : 0;
-    }
-    dict[key] = value.toString();
-  });
-  return dict as Record<string, string>;
+const formatHexLength = (hex: string): string => {
+  const temp = '0'.repeat(8-hex.length) + hex;
+  let out = '';
+  for(let x = temp.length - 1; x > 0; x-=2) {
+    out+= temp[x-1] + temp[x];
+  }
+  return out;
 };
 
-export { strToHex, tryParseInt, stringifyRecord };
+export { strToHex, tryParseInt, formatHexLength };

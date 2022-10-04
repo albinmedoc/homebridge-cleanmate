@@ -1,24 +1,23 @@
 import events from 'events';
+import { Blob } from 'buffer';
 import TCPService from './tcpService';
-import { strToHex, tryParseInt, stringifyRecord } from './helpers';
+import { strToHex, tryParseInt } from './helpers';
 import { WorkMode, CleanmateStatus, StatusResponse, WorkState, MopMode } from './types';
-import Constants from './constants';
 
 class CleanmateService {
-  ipAddress: string;
-  authCode: string;
+  public ipAddress: string;
+  public authCode: string;
+  public events: events;
 
-  status: CleanmateStatus = {
+  private port = 8888;
+
+  private status: CleanmateStatus = {
     batteryLevel: 0,
     version: '',
     workMode: WorkMode.Standard,
     workState: WorkState.Charging,
     mopMode: MopMode.Medium,
   };
-
-  latestStatusResponse?: StatusResponse;
-  lastStatusUpdate?: number;
-  events: events;
 
   constructor(ipAddress: string, authCode: string, pollInterval: number = 15) {
     this.ipAddress = ipAddress;
@@ -80,8 +79,17 @@ class CleanmateService {
     this.events.on(eventName, callback);
   }
 
-  private createRequest(prefix: string, transitCmd: number, value: Record<string, string | number>) {
-    const request = {
+  private formatHexLength(hex: string): string {
+    const temp = '0'.repeat(8 - hex.length) + hex;
+    let out = '';
+    for (let x = temp.length - 1; x > 0; x -= 2) {
+      out += temp[x - 1] + temp[x];
+    }
+    return out;
+  }
+
+  private createRequest(value: Record<string, unknown>): string {
+    const request = JSON.stringify({
       version: '1.0',
       control: {
         broadcast: '0',
@@ -89,17 +97,20 @@ class CleanmateService {
         targetId: 'C1F54FE0F16249689590EF3C6F04133B', // Looks like this can be anything with 32 characters
         authCode: this.authCode,
       },
-      value: stringifyRecord({ ...value, transitCmd }),
-    };
-    const requesthex = strToHex(JSON.stringify(request));
-    return `${prefix}${requesthex}`;
+      value,
+    });
+    const requestSize = new Blob([request]).size + 20;
+    const requestSizeHex = requestSize.toString(16);
+    const requesthex = strToHex(request);
+    return `${this.formatHexLength(requestSizeHex)}fa00000001000000c527000001000000${requesthex}`;
   }
 
   private updateStatus(): Promise<void> {
-    const request = this.createRequest(Constants.StatusPrefix, 98, {
+    const request = this.createRequest({
       state: '',
+      transitCmd: '98',
     });
-    const tcpService = new TCPService(this.ipAddress, 8888);
+    const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
     return tcpService.getResponse<StatusResponse>()
       .then((data) => {
@@ -108,53 +119,55 @@ class CleanmateService {
         this.workMode = tryParseInt(data.value.workMode);
         this.workState = tryParseInt(data.value.workState);
         this.mopMode = tryParseInt(data.value.waterTank);
-
-        this.latestStatusResponse = data;
-        this.lastStatusUpdate = Date.now();
       });
   }
 
   public start(workMode?: WorkMode) {
     let request = '';
     if (workMode) {
-      request = this.createRequest(Constants.WorkModePrefix, 106, {
-        mode: workMode,
+      request = this.createRequest({
+        mode: workMode.toString(),
+        transitCmd: '106',
       });
       this.status.workMode = workMode;
     } else {
-      request = this.createRequest(Constants.StartPrefix, 100, {
-        start: 1,
+      request = this.createRequest({
+        start: '1',
+        transitCmd: '100',
       });
     }
-    const tcpService = new TCPService(this.ipAddress, 8888);
+    const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
     this.status.workState = WorkState.Cleaning;
   }
 
   public pause() {
-    const request = this.createRequest(Constants.PausePrefix, 102, {
-      pause: 1,
-      isStop: 0,
+    const request = this.createRequest({
+      pause: '1',
+      isStop: '0',
+      transitCmd: '102',
     });
-    const tcpService = new TCPService(this.ipAddress, 8888);
+    const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
     this.status.workState = WorkState.Paused;
   }
 
   public charge() {
-    const request = this.createRequest(Constants.ChargePrefix, 104, {
-      charge: 1,
+    const request = this.createRequest({
+      charge: '1',
+      transitCmd: '104',
     });
-    const tcpService = new TCPService(this.ipAddress, 8888);
+    const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
   }
 
   public setMopMode(mopMode: MopMode) {
-    const request = this.createRequest(Constants.MopModePrefix, 145, {
-      waterTank: mopMode,
-      watertank: mopMode,
+    const request = this.createRequest({
+      waterTank: mopMode.toString(),
+      watertank: mopMode.toString(),
+      transitCmd: '145',
     });
-    const tcpService = new TCPService(this.ipAddress, 8888);
+    const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
   }
 }
