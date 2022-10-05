@@ -17,6 +17,7 @@ class CleanmateService {
     workMode: WorkMode.Standard,
     workState: WorkState.Charging,
     mopMode: MopMode.Medium,
+    volume: 2,
   };
 
   constructor(ipAddress: string, authCode: string, pollInterval: number = 15) {
@@ -75,6 +76,15 @@ class CleanmateService {
     this.status.mopMode = value;
   }
 
+  public get volume(): number {
+    return this.status.volume;
+  }
+
+  private set volume(value: number) {
+    this.events.emit('volumeChange', value);
+    this.status.volume = value;
+  }
+
   public on(eventName: string, callback: (value) => void) {
     this.events.on(eventName, callback);
   }
@@ -119,6 +129,7 @@ class CleanmateService {
         this.workMode = tryParseInt(data.value.workMode);
         this.workState = tryParseInt(data.value.workState);
         this.mopMode = tryParseInt(data.value.waterTank);
+        this.volume = this.mapToVolume(tryParseInt(data.value.voice));
       });
   }
 
@@ -167,6 +178,29 @@ class CleanmateService {
       watertank: mopMode.toString(),
       transitCmd: '145',
     });
+    const tcpService = new TCPService(this.ipAddress, this.port);
+    tcpService.sendPacket(request);
+  }
+
+  private mapToVolume(value: number): number {
+    return (value - 1) * 100;
+  }
+
+  private mapFromVolume(volume: number): number {
+    return tryParseInt((1 + (volume / 100)).toFixed(1));
+  }
+
+  public setVolume(volumeLevel: number) {
+    if(volumeLevel < 0 || volumeLevel > 100){
+      throw new Error('Volume level has to be between 0-100');
+    }
+    const volume = this.mapFromVolume(volumeLevel);
+    const request = this.createRequest({
+      volume,
+      voice: '',
+      transitCmd: '123',
+    });
+    this.status.volume = volume;
     const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
   }

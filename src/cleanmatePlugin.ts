@@ -7,6 +7,7 @@ import {
   MainService,
   PauseSwitch,
   ProblemSensor,
+  VolumeService,
 } from './services';
 import { ServiceBase } from './services/serviceBase';
 import { Config, MopMode, PluginConfig } from './types';
@@ -39,6 +40,10 @@ class CleanmatePlugin implements AccessoryPlugin {
         name: config.occupancySensor?.name ?? 'Docked',
         inverted: config.occupancySensor?.inverted ?? false,
       },
+      volume: {
+        enable: config.volume?.enable ?? false,
+        name: config.volume?.name ?? 'Volume',
+      },
     };
     this.cleanmateService = new CleanmateService(conf.ipAddress, conf.authCode, conf.pollInterval);
 
@@ -49,6 +54,7 @@ class CleanmatePlugin implements AccessoryPlugin {
       ...(conf.pauseSwitch.enable ? [new PauseSwitch(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.occupancySensor.enable ? [new DockSensor(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.motionSensor.enable ? [new ProblemSensor(api.hap, logger, conf, this.cleanmateService)] : []),
+      ...(conf.volume.enable ? [new VolumeService(api.hap, logger, conf, this.cleanmateService)] : []),
     ];
   }
 

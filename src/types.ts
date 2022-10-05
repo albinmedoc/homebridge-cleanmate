@@ -27,6 +27,10 @@ interface BaseConfig {
         name?: string;
         inverted?: boolean;
     };
+    volume?: {
+        enable?: boolean;
+        name?: string;
+    };
 }
 
 export interface Config extends AccessoryConfig, BaseConfig { }
@@ -58,6 +62,7 @@ export interface CleanmateStatus {
     workMode: WorkMode;
     workState: WorkState;
     mopMode: MopMode;
+    volume: number;
 }
 
 export interface StatusResponse {

@@ -166,7 +166,7 @@
                "title": "Name",
                "type": "string",
                "placeholder": "Docked",
-               "description": "The name of the occupancy sensor ",
+               "description": "The name of the occupancy sensor",
                "condition": {
                   "functionBody": "return model.occupancySensor.enable === true;"
                }
@@ -178,6 +178,27 @@
                "description": "Activate when robot is at dock",
                "condition": {
                   "functionBody": "return model.occupancySensor.enable === true;"
+               }
+            }
+         }
+      },
+      "volume": {
+         "title": "Volume",
+         "type": "object",
+         "properties": {
+            "enable": {
+               "title": "Enable",
+               "type": "boolean",
+               "default": false,
+               "description": "Add a lightbulb to control the volume of the robot"
+            },
+            "name": {
+               "title": "Name",
+               "type": "string",
+               "placeholder": "Volume",
+               "description": "The name of the lightbulb",
+               "condition": {
+                  "functionBody": "return model.volume.enable === true;"
                }
             }
          }
@@ -241,6 +262,17 @@
                   "occupancySensor.enable",
                   "occupancySensor.name",
                   "occupancySensor.inverted"
+               ]
+            },
+            {
+               "key": "volume",
+               "type": "section",
+               "title": "Volume",
+               "expandable": true,
+               "expanded": true,
+               "items": [
+                  "occupancySensor.enable",
+                  "occupancySensor.name"
                ]
             }
          ]
