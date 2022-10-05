@@ -170,6 +170,21 @@ class CleanmateService {
     const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
   }
+
+  public cleanRooms(roomIds: number[]){
+    const uniqueSortedRoomIds = [...new Set(roomIds)].sort();
+    const cleanBlocks = uniqueSortedRoomIds.map((roomId) => ({
+      'cleanNum': '1',
+      'blockNum': roomId.toString(),
+    }));
+    const request = this.createRequest({
+      'opCmd': 'cleanBlocks',
+      cleanBlocks,
+    });
+
+    const tcpService = new TCPService(this.ipAddress, this.port);
+    tcpService.sendPacket(request);
+  }
 }
 
 export default CleanmateService;
