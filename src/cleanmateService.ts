@@ -112,6 +112,7 @@ class CleanmateService {
     const requestSize = new Blob([request]).size + 20;
     const requestSizeHex = requestSize.toString(16);
     const requesthex = strToHex(request);
+
     return `${this.formatHexLength(requestSizeHex)}fa00000001000000c527000001000000${requesthex}`;
   }
 
@@ -187,7 +188,7 @@ class CleanmateService {
   }
 
   private mapFromVolume(volume: number): number {
-    return tryParseInt((1 + (volume / 100)).toFixed(1));
+    return 1 + Math.round((volume/100) * 10) / 10;
   }
 
   public setVolume(volumeLevel: number) {
@@ -196,7 +197,7 @@ class CleanmateService {
     }
     const volume = this.mapFromVolume(volumeLevel);
     const request = this.createRequest({
-      volume,
+      volume: volume.toString(),
       voice: '',
       transitCmd: '123',
     });

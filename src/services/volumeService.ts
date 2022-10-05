@@ -25,6 +25,7 @@ export default class VolumeService extends ServiceBase {
 
   setVolumeState(value: CharacteristicValue) {
     const volume = value ? 100 : 0;
+    this.log.debug(`Turn ${value ? 'on' : 'off'} volume`);
     this.cleanmateService.setVolume(volume);
   }
 
@@ -34,6 +35,7 @@ export default class VolumeService extends ServiceBase {
 
   setVolumeLevelState(value: CharacteristicValue) {
     this.cleanmateService.setVolume(value as number);
+    this.log.debug('Setting volume level to', value);
   }
 
   public get services(): Service[] {

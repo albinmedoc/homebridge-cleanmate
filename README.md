@@ -67,11 +67,17 @@ This is an accessory plugin, the configuration should be set under accessories i
 | `clockwiseMode?`             | Which [mop mode](#mop-modes) to use when clockwise is used               | 20 (High) | Number  |
 | `counterClockwiseMode?`      | Which mop mode to use when counter clockwise is used                     | 60 (Low)  | Number  |
 | `pauseSwitch?.enable`        | Add a switch that will pause the robot                                   |   true    | Boolean |
+| `pauseSwitch?.name`          | The name of the switch                                                   |   Pause   | String  |
 | `pauseSwitch?.inverted`      | Invert the switch, pause on disable                                      |   false   | Boolean |
-| `motionSensor?.enable`       | Add a motion sensor that triggers when the robot has a problem           |   true    | Boolean |
+| `motionSensor?.enable`       | Add a motion sensor that triggers when the robot has a problem           |   false   | Boolean |
+| `motionSensor?.name`         | The name of the motion sensor                                            |  Problem  | String  |
 | `motionSensor?.inverted`     | Invert the motion sensor, activate when the robot doesn't have a problem |   false   | Boolean |
-| `occupancySensor?.enable?`   | Add a occupancy sensor that will represent if the robot is at dock       |   true    | Boolean |
+| `occupancySensor?.enable?`   | Add a occupancy sensor that will represent if the robot is at dock       |   false   | Boolean |
+| `occupancySensor?.name?`     | The name of the occupancy sensor                                         |  Docked   | String  |
 | `occupancySensor?.inverted?` | Invert occupancy sensor, activate when robot is at dock                  |   false   | Number  |
+| `volume?.enable?`            | Add a lightbulb that allows you to control the volume of the robot       |   false   | Boolean |
+| `volume?.name?`              | The name of the lightbulb                                                |  Docked   | String  |
+
 
 ### Mop Modes
 | Mode   | Key |

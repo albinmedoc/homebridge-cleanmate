@@ -271,8 +271,8 @@
                "expandable": true,
                "expanded": true,
                "items": [
-                  "occupancySensor.enable",
-                  "occupancySensor.name"
+                  "volume.enable",
+                  "volume.name"
                ]
             }
          ]
