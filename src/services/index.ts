@@ -5,6 +5,7 @@ import MainService from './mainService';
 import PauseSwitch from './pauseSwitch';
 import ProblemSensor from './problemSensor';
 import VolumeService from './volumeService';
+import RoomService from './roomService';
 
 export {
   BatteryServide,
@@ -14,4 +15,5 @@ export {
   PauseSwitch,
   ProblemSensor,
   VolumeService,
+  RoomService,
 };

@@ -77,6 +77,9 @@ This is an accessory plugin, the configuration should be set under accessories i
 | `occupancySensor?.inverted?` | Invert occupancy sensor, activate when robot is at dock                  |   false   | Number  |
 | `volume?.enable?`            | Add a lightbulb that allows you to control the volume of the robot       |   false   | Boolean |
 | `volume?.name?`              | The name of the lightbulb                                                |  Docked   | String  |
+| `roomTimeout`                | The time to wait for a new room selection                                |    30     | Number  |
+| `rooms?[].id`                | The id of the room                                                       |           | Number  |
+| `rooms?[].name`              | The name of the room                                                     |           | String  |
 
 
 ### Mop Modes

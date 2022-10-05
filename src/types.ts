@@ -31,6 +31,11 @@ interface BaseConfig {
         enable?: boolean;
         name?: string;
     };
+    roomTimeout: number;
+    rooms?: Array<{
+        id: number;
+        name: string;
+    }>;
 }
 
 export interface Config extends AccessoryConfig, BaseConfig { }

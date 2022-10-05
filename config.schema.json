@@ -202,12 +202,74 @@
                }
             }
          }
+      },
+      "roomTimeout": {
+         "title": "Room timeout",
+         "description": "The time to wait for a new room selection",
+         "type": "number",
+         "required": false,
+         "default": 30
+      },
+      "rooms": {
+         "title": "Room cleaning",
+         "type": "array",
+         "required": false,
+         "items": {
+            "title": "Rooms",
+            "type": "object",
+            "properties": {
+               "name": {
+                  "name": "Room Name",
+                  "type": "string"
+               },
+               "id": {
+                  "name": "Room ID",
+                  "type": "integer"
+               }
+            }
+         }
       }
    },
    "layout": [
       "name",
       "ipAddress",
       "authCode",
+      {
+         "type": "fieldset",
+         "title": "Rooms",
+         "description": "Room Mapping",
+         "expandable": true,
+         "expanded": false,
+         "items": [
+            "roomTimeout",
+            {
+               "notitle": true,
+               "key": "rooms",
+               "type": "array",
+               "items": [
+                  {
+                     "type": "div",
+                     "displayFlex": true,
+                     "flex-direction": "row",
+                     "items": [
+                        {
+                           "key": "rooms[].id",
+                           "flex": "1 1 50px",
+                           "notitle": true,
+                           "placeholder": "Room ID"
+                        },
+                        {
+                           "key": "rooms[].name",
+                           "flex": "6 4 200px",
+                           "notitle": true,
+                           "placeholder": "Room Name"
+                        }
+                     ]
+                  }
+               ]
+            }
+         ]
+      },
       {
          "key": "advanced",
          "type": "section",
