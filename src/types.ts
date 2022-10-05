@@ -27,6 +27,10 @@ interface BaseConfig {
         name?: string;
         inverted?: boolean;
     };
+    rooms?: Array<{
+        id: number;
+        name: string;
+    }>;
 }
 
 export interface Config extends AccessoryConfig, BaseConfig { }
