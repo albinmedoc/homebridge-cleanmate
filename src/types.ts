@@ -27,6 +27,10 @@ interface BaseConfig {
         name?: string;
         inverted?: boolean;
     };
+    findSwitch?: {
+        enable?: boolean;
+        name?: string;
+    };
 }
 
 export interface Config extends AccessoryConfig, BaseConfig { }

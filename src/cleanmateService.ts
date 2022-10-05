@@ -170,6 +170,15 @@ class CleanmateService {
     const tcpService = new TCPService(this.ipAddress, this.port);
     tcpService.sendPacket(request);
   }
+
+  public findRobot() {
+    const request = this.createRequest({
+      find: '',
+      transitCmd: '143',
+    });
+    const tcpService = new TCPService(this.ipAddress, this.port);
+    tcpService.sendPacket(request);
+  }
 }
 
 export default CleanmateService;

@@ -3,6 +3,7 @@ import CleanmateService from './cleanmateService';
 import {
   BatteryServide,
   DockSensor,
+  FindSwitch,
   InformationService,
   MainService,
   PauseSwitch,
@@ -39,6 +40,10 @@ class CleanmatePlugin implements AccessoryPlugin {
         name: config.occupancySensor?.name ?? 'Docked',
         inverted: config.occupancySensor?.inverted ?? false,
       },
+      findSwitch: {
+        enable: config.findSwitch?.enable ?? false,
+        name: config.findSwitch?.name ?? 'Find',
+      },
     };
     this.cleanmateService = new CleanmateService(conf.ipAddress, conf.authCode, conf.pollInterval);
 
@@ -49,6 +54,7 @@ class CleanmatePlugin implements AccessoryPlugin {
       ...(conf.pauseSwitch.enable ? [new PauseSwitch(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.occupancySensor.enable ? [new DockSensor(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.motionSensor.enable ? [new ProblemSensor(api.hap, logger, conf, this.cleanmateService)] : []),
+      ...(conf.findSwitch.enable ? [new FindSwitch(api.hap, logger, conf, this.cleanmateService)] : []),
     ];
   }
 

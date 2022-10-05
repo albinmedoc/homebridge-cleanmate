@@ -181,6 +181,27 @@
                }
             }
          }
+      },
+      "findSwitch": {
+         "title": "Find switch",
+         "type": "object",
+         "properties": {
+            "enable": {
+               "title": "Enable",
+               "type": "boolean",
+               "default": false,
+               "description": "Add a switch that will help you find the robot"
+            },
+            "name": {
+               "title": "Name",
+               "type": "string",
+               "placeholder": "Docked",
+               "description": "The name of the switch",
+               "condition": {
+                  "functionBody": "return model.findSwitch.enable === true;"
+               }
+            }
+         }
       }
    },
    "layout": [
