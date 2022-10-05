@@ -203,6 +203,27 @@
             }
          }
       },
+      "findSwitch": {
+         "title": "Find switch",
+         "type": "object",
+         "properties": {
+            "enable": {
+               "title": "Enable",
+               "type": "boolean",
+               "default": false,
+               "description": "Add a switch that will help you find the robot"
+            },
+            "name": {
+               "title": "Name",
+               "type": "string",
+               "placeholder": "Find",
+               "description": "The name of the switch",
+               "condition": {
+                  "functionBody": "return model.findSwitch.enable === true;"
+               }
+            }
+         }
+      },
       "roomTimeout": {
          "title": "Room timeout",
          "description": "The time to wait for a new room selection",
@@ -335,6 +356,17 @@
                "items": [
                   "volume.enable",
                   "volume.name"
+               ]
+            },
+            {
+               "key": "findSwitch",
+               "type": "section",
+               "title": "Find robot switch",
+               "expandable": true,
+               "expanded": true,
+               "items": [
+                  "findSwitch.enable",
+                  "findSwitch.name"
                ]
             }
          ]

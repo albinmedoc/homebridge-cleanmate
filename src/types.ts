@@ -31,6 +31,10 @@ interface BaseConfig {
         enable?: boolean;
         name?: string;
     };
+    findSwitch?: {
+        enable?: boolean;
+        name?: string;
+    };
     roomTimeout: number;
     rooms?: Array<{
         id: number;

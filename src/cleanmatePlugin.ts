@@ -3,6 +3,7 @@ import CleanmateService from './cleanmateService';
 import {
   BatteryServide,
   DockSensor,
+  FindSwitch,
   InformationService,
   MainService,
   PauseSwitch,
@@ -45,6 +46,10 @@ class CleanmatePlugin implements AccessoryPlugin {
         enable: config.volume?.enable ?? false,
         name: config.volume?.name ?? 'Volume',
       },
+      findSwitch: {
+        enable: config.findSwitch?.enable ?? false,
+        name: config.findSwitch?.name ?? 'Find',
+      },
       roomTimeout: config.roomTimeout ?? 30,
       rooms: config.rooms ?? [],
     };
@@ -58,6 +63,7 @@ class CleanmatePlugin implements AccessoryPlugin {
       ...(conf.occupancySensor.enable ? [new DockSensor(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.motionSensor.enable ? [new ProblemSensor(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.volume.enable ? [new VolumeService(api.hap, logger, conf, this.cleanmateService)] : []),
+      ...(conf.findSwitch.enable ? [new FindSwitch(api.hap, logger, conf, this.cleanmateService)] : []),
       ...(conf.rooms.length ? [new RoomService(api.hap, logger, conf, this.cleanmateService)] : []),
     ];
   }

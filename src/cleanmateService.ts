@@ -222,6 +222,15 @@ class CleanmateService {
     tcpService.sendPacket(request);
     this.workState = WorkState.Cleaning;
   }
+
+  public findRobot() {
+    const request = this.createRequest({
+      find: '',
+      transitCmd: '143',
+    });
+    const tcpService = new TCPService(this.ipAddress, this.port);
+    tcpService.sendPacket(request);
+  }
 }
 
 export default CleanmateService;
