@@ -22,7 +22,8 @@
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky install"
   },
   "keywords": [
     "homebridge-plugin"
@@ -39,6 +40,7 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.3.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "husky": "^8.0.0"
   }
 }
