@@ -16,8 +16,8 @@ export default class DockSensor extends ServiceBase {
       .onGet(this.getBatteryLevelState.bind(this));
     this.service.getCharacteristic(this.hap.Characteristic.ChargingState)
       .onGet(this.getChargingState.bind(this));
-    this.cleanmateService.on('batteryLevelChange', this.batteryLevelChanged.bind(this));
-    this.cleanmateService.on('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmateService.addListener('batteryLevelChange', this.batteryLevelChanged.bind(this));
+    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
   }
 
   private batteryLevelChanged(value: number){

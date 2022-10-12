@@ -12,7 +12,7 @@ export default class DockSensor extends ServiceBase {
     this.service = new this.hap.Service.OccupancySensor(`${this.config.name} ${this.config.occupancySensor.name}`);
     this.service.getCharacteristic(this.hap.Characteristic.OccupancyDetected)
       .onGet(this.getDockState.bind(this));
-    this.cleanmateService.on('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
   }
 
   private workStateChanged(value: WorkState){

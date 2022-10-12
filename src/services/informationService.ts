@@ -13,7 +13,7 @@ export default class InformationService extends ServiceBase {
     this.service.setCharacteristic(this.hap.Characteristic.Manufacturer, 'Cleanmate');
     this.service.getCharacteristic(this.hap.Characteristic.FirmwareRevision)
       .onGet(this.getFirmwareRevisionState.bind(this));
-    this.cleanmateService.on('versionChange', this.versionChanged.bind(this));
+    this.cleanmateService.addListener('versionChange', this.versionChanged.bind(this));
   }
 
   private versionChanged(value: string){

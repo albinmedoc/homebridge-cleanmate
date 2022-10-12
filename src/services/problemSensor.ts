@@ -12,7 +12,7 @@ export default class ProblemSensor extends ServiceBase {
     this.service = new this.hap.Service.MotionSensor(`${this.config.name} ${this.config.motionSensor.name}`);
     this.service.getCharacteristic(this.hap.Characteristic.MotionDetected)
       .onGet(this.getDockState.bind(this));
-    this.cleanmateService.on('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
   }
 
   private workStateChanged(value: WorkState){

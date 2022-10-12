@@ -19,9 +19,9 @@ export default class MainService extends ServiceBase {
     this.service.getCharacteristic(this.hap.Characteristic.RotationDirection)
       .onGet(this.getRotationState.bind(this))
       .onSet(this.setRotationState.bind(this));
-    this.cleanmateService.on('workStateChange', this.workStateChanged.bind(this));
-    this.cleanmateService.on('workModeChange', this.workModeChanged.bind(this));
-    this.cleanmateService.on('mopModeChange', this.mopModeChanged.bind(this));
+    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmateService.addListener('workModeChange', this.workModeChanged.bind(this));
+    this.cleanmateService.addListener('mopModeChange', this.mopModeChanged.bind(this));
   }
 
   private workStateChanged(value: WorkState) {

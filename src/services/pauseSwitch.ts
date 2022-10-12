@@ -13,7 +13,7 @@ export default class PauseSwitch extends ServiceBase {
     this.service.getCharacteristic(this.hap.Characteristic.On)
       .onGet(this.getPauseState.bind(this))
       .onSet(this.setPauseState.bind(this));
-    this.cleanmateService.on('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
   }
 
   private workStateChanged(value: WorkState){

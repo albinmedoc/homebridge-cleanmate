@@ -109,12 +109,26 @@ class CleanmateService extends CleanmateConnection {
   * });
   * ```
   */
-  public addListener(eventName: string, listener: (...args: unknown[]) => void) {
-    this.events.addListener(eventName, listener);
+  public addListener(eventName: 'batteryLevelChange', listener: (batteryLevel: number) => void): events;
+  public addListener(eventName: 'versionChange', listener: (version: string) => void): events;
+  public addListener(eventName: 'workModeChange', listener: (workMode: WorkMode) => void): events;
+  public addListener(eventName: 'workStateChange', listener: (workState: WorkState) => void): events;
+  public addListener(eventName: 'mopModeChange', listener: (mopMode: MopMode) => void): events;
+  public addListener(eventName: 'volumeChange', listener: (volume: number) => void): events;
+  public addListener(eventName: 'statusChange', listener: (status: CleanmateStatus) => void): events;
+  public addListener(eventName: string, listener: (...args: never[]) => void): events {
+    return this.events.addListener(eventName, listener as (...args: unknown[]) => void);
   }
 
-  public removeListener(eventName: string, listener: (...args: unknown[]) => void) {
-    this.events.removeListener(eventName, listener);
+  public removeListener(eventName: 'batteryLevelChange', listener: (batteryLevel: number) => void): events;
+  public removeListener(eventName: 'versionChange', listener: (version: string) => void): events;
+  public removeListener(eventName: 'workModeChange', listener: (workMode: WorkMode) => void): events;
+  public removeListener(eventName: 'workStateChange', listener: (workState: WorkState) => void): events;
+  public removeListener(eventName: 'mopModeChange', listener: (mopMode: MopMode) => void): events;
+  public removeListener(eventName: 'volumeChange', listener: (volume: number) => void): events;
+  public removeListener(eventName: 'statusChange', listener: (status: CleanmateStatus) => void): events;
+  public removeListener(eventName: string, listener: (...args: never[]) => void): events {
+    return this.events.removeListener(eventName, listener as (...args: unknown[]) => void);
   }
 
   private tryParseInt(str: string): number {
