@@ -1,15 +1,9 @@
 import events from 'events';
-import { Blob } from 'buffer';
-import TCPService from './tcpService';
-import { strToHex, tryParseInt } from './helpers';
 import { WorkMode, CleanmateStatus, StatusResponse, WorkState, MopMode } from './types';
+import CleanmateConnection from './cleanmateConnection';
 
-class CleanmateService {
-  public ipAddress: string;
-  public authCode: string;
+class CleanmateService extends CleanmateConnection {
   public events: events;
-
-  private port = 8888;
 
   private status: CleanmateStatus = {
     batteryLevel: 0,
@@ -20,17 +14,21 @@ class CleanmateService {
     volume: 2,
   };
 
-  constructor(ipAddress: string, authCode: string, pollInterval: number = 15) {
-    this.ipAddress = ipAddress;
-    this.authCode = authCode;
+  constructor(ipAddress: string, authCode: string, pollInterval: number = 0) {
+    super(ipAddress, authCode);
     this.events = new events.EventEmitter();
+    this.client.on('data', this.onStatusResponse.bind(this));
 
-    /* Update status of Cleanmate robot at an interval */
-    setInterval(() => {
-      this.updateStatus();
-    }, 1000 * pollInterval);
+    if(pollInterval) {
+      setInterval(() => {
+        this.pollStatus();
+      }, 1000 * pollInterval);
+    }
   }
 
+  /**
+  * The current battery level of the robot.
+  */
   public get batteryLevel(): number {
     return this.status.batteryLevel || 0;
   }
@@ -40,6 +38,9 @@ class CleanmateService {
     this.status.batteryLevel = value;
   }
 
+  /**
+  * The current version of the robot.
+  */
   public get version(): string {
     return this.status.version;
   }
@@ -49,6 +50,9 @@ class CleanmateService {
     this.status.version = value;
   }
 
+  /**
+  * The current {@link WorkMode} of the robot.
+  */
   public get workMode(): WorkMode {
     return this.status.workMode;
   }
@@ -58,6 +62,9 @@ class CleanmateService {
     this.status.workMode = value;
   }
 
+  /**
+  * The current {@link WorkState} of the robot.
+  */
   public get workState(): WorkState {
     return this.status.workState;
   }
@@ -67,6 +74,9 @@ class CleanmateService {
     this.status.workState = value;
   }
 
+  /**
+  * The current {@link MopMode} of the robot.
+  */
   public get mopMode(): MopMode {
     return this.status.mopMode;
   }
@@ -76,6 +86,9 @@ class CleanmateService {
     this.status.mopMode = value;
   }
 
+  /**
+  * The current volume level of the robot.
+  */
   public get volume(): number {
     return this.status.volume;
   }
@@ -85,151 +98,183 @@ class CleanmateService {
     this.status.volume = value;
   }
 
-  public on(eventName: string, callback: (value) => void) {
-    this.events.on(eventName, callback);
+  /**
+  * Adds the listener function to the end of the listeners array for the event named eventName.
+  * No checks are made to see if the listener has already been added.
+  * Multiple calls passing the same combination of eventName and listener will result in the listener being added,
+  * and called, multiple times.
+  * ```js
+  * server.on('workModeChange', (workMode) => {
+  *   console.log('Work mode changed to', workMode);
+  * });
+  * ```
+  */
+  public addListener(eventName: string, listener: (...args: unknown[]) => void) {
+    this.events.addListener(eventName, listener);
   }
 
-  private formatHexLength(hex: string): string {
-    const temp = '0'.repeat(8 - hex.length) + hex;
-    let out = '';
-    for (let x = temp.length - 1; x > 0; x -= 2) {
-      out += temp[x - 1] + temp[x];
+  public removeListener(eventName: string, listener: (...args: unknown[]) => void) {
+    this.events.removeListener(eventName, listener);
+  }
+
+  private tryParseInt(str: string): number {
+    const int = parseInt(str);
+    if(isNaN(int)) {
+      throw new TypeError('String is not an number');
     }
-    return out;
+    return int;
   }
 
-  private createRequest(value: Record<string, unknown>): string {
-    const request = JSON.stringify({
-      version: '1.0',
-      control: {
-        broadcast: '0',
-        targetType: '2',
-        targetId: 'C1F54FE0F16249689590EF3C6F04133B', // Looks like this can be anything with 32 characters
-        authCode: this.authCode,
-      },
-      value,
-    });
-    const requestSize = new Blob([request]).size + 20;
-    const requestSizeHex = requestSize.toString(16);
-    const requesthex = strToHex(request);
+  private onStatusResponse(data: Buffer) {
+    try {
+      const response: StatusResponse = JSON.parse(data.toString('ascii'));
+      this.batteryLevel = this.tryParseInt(response.value.battery);
+      this.version = response.value.version;
+      this.workMode = this.tryParseInt(response.value.workMode);
+      this.workState = this.tryParseInt(response.value.workState);
+      this.mopMode = this.tryParseInt(response.value.waterTank);
+      this.volume = this.mapToVolume(this.tryParseInt(response.value.voice));
 
-    return `${this.formatHexLength(requestSizeHex)}fa00000001000000c527000001000000${requesthex}`;
+      this.events.emit('statusChange', this.status);
+    } catch (err) {
+      // This should not happen
+    }
   }
 
-  private updateStatus(): Promise<void> {
-    const request = this.createRequest({
+  /**
+  * Send a request to get the status.
+  * If you want to act on the response, make sure you have registered a event listener using the {@link on} function.
+  */
+  public pollStatus(): Promise<void> {
+    const request = this.makeRequest({
       state: '',
       transitCmd: '98',
     });
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
-    return tcpService.getResponse<StatusResponse>()
-      .then((data) => {
-        this.batteryLevel = tryParseInt(data.value.battery);
-        this.version = data.value.version;
-        this.workMode = tryParseInt(data.value.workMode);
-        this.workState = tryParseInt(data.value.workState);
-        this.mopMode = tryParseInt(data.value.waterTank);
-        this.volume = this.mapToVolume(tryParseInt(data.value.voice));
-      });
+    return this.sendRequest(request);
   }
 
-  public start(workMode?: WorkMode) {
-    let request = '';
+  /**
+  * Start cleaning.
+  * If no work mode is passed, use the last work mode
+  * @param [workMode] The {@link WorkMode} to use when cleaning
+  */
+  public start(workMode?: WorkMode): Promise<void> {
+    let request: Buffer;
     if (workMode) {
-      request = this.createRequest({
+      request = this.makeRequest({
         mode: workMode.toString(),
         transitCmd: '106',
       });
       this.status.workMode = workMode;
     } else {
-      request = this.createRequest({
+      request = this.makeRequest({
         start: '1',
         transitCmd: '100',
       });
     }
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
-    this.status.workState = WorkState.Cleaning;
+    return this.sendRequest(request).then(() => {
+      this.status.workState = WorkState.Cleaning;
+    });
+
   }
 
-  public pause() {
-    const request = this.createRequest({
+  /**
+  * Pause cleaning
+  */
+  public pause(): Promise<void> {
+    const request = this.makeRequest({
       pause: '1',
       isStop: '0',
       transitCmd: '102',
     });
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
-    this.status.workState = WorkState.Paused;
+    return this.sendRequest(request).then(() => {
+      this.status.workState = WorkState.Paused;
+    });
   }
 
-  public charge() {
-    const request = this.createRequest({
+  /**
+  * Go to charging station
+  */
+  public charge(): Promise<void> {
+    const request = this.makeRequest({
       charge: '1',
       transitCmd: '104',
     });
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
+    return this.sendRequest(request);
   }
 
-  public setMopMode(mopMode: MopMode) {
-    const request = this.createRequest({
+  /**
+  * Set mop mode
+  *
+  * @param [mopMode] The {@link MopMode} to set
+  */
+  public setMopMode(mopMode: MopMode): Promise<void> {
+    const request = this.makeRequest({
       waterTank: mopMode.toString(),
-      watertank: mopMode.toString(),
       transitCmd: '145',
     });
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
+    return this.sendRequest(request).then(() => {
+      this.status.mopMode = mopMode;
+    });
   }
 
   private mapToVolume(value: number): number {
-    return (value - 1) * 100;
+    return Math.round((value - 1) * 100);
   }
 
   private mapFromVolume(volume: number): number {
     return 1 + Math.round((volume/100) * 10) / 10;
   }
 
-  public setVolume(volumeLevel: number) {
+  /**
+  * Set volume level
+  *
+  * @param [volumeLevel] The volume (0-100)
+  */
+  public setVolume(volumeLevel: number): Promise<void> {
     if(volumeLevel < 0 || volumeLevel > 100){
       throw new Error('Volume level has to be between 0-100');
     }
     const volume = this.mapFromVolume(volumeLevel);
-    const request = this.createRequest({
-      volume: volume.toString(),
+    const request = this.makeRequest({
+      volume: volume.toFixed(1),
       voice: '',
       transitCmd: '123',
     });
-
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
-    this.status.volume = volume;
+    return this.sendRequest(request).then(() => {
+      this.status.volume = volume;
+    });
   }
 
-  public cleanRooms(roomIds: number[]){
+  /**
+  * Clean specified rooms
+  *
+  * @param [roomIds] A list of room ids to clean
+  */
+  public cleanRooms(roomIds: number[]): Promise<void> {
     const uniqueSortedRoomIds = [...new Set(roomIds)].sort();
     const cleanBlocks = uniqueSortedRoomIds.map((roomId) => ({
       'cleanNum': '1',
       'blockNum': roomId.toString(),
     }));
-    const request = this.createRequest({
+    const request = this.makeRequest({
       'opCmd': 'cleanBlocks',
       cleanBlocks,
     });
-
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
-    this.workState = WorkState.Cleaning;
+    return this.sendRequest(request).then(() => {
+      this.workState = WorkState.Cleaning;
+    });
   }
 
-  public findRobot() {
-    const request = this.createRequest({
+  /**
+  * Clean specified rooms
+  */
+  public findRobot(): Promise<void> {
+    const request = this.makeRequest({
       find: '',
       transitCmd: '143',
     });
-    const tcpService = new TCPService(this.ipAddress, this.port);
-    tcpService.sendPacket(request);
+    return this.sendRequest(request);
   }
 }
 
