@@ -25,7 +25,13 @@ jobs:
       - name: Lint the project
         run: npm run lint
 
+      - name: Run tests
+        run: npm run test -- --coverage
+
       - name: Build the project
         run: npm run build
         env:
           CI: true
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
