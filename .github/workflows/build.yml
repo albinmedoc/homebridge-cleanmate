@@ -27,6 +27,7 @@ jobs:
 
       - name: Run tests
         run: npm run test -- --coverage
+        shell: bash
 
       - name: Build the project
         run: npm run build
