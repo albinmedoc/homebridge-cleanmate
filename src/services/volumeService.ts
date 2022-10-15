@@ -17,6 +17,13 @@ export default class VolumeService extends ServiceBase {
     this.service.getCharacteristic(this.hap.Characteristic.Brightness)
       .onGet(this.getVolumeLevelState.bind(this))
       .onSet(this.setVolumeLevelState.bind(this));
+
+    this.cleanmateService.addListener('volumeChange', this.volumeChanged.bind(this));
+  }
+
+  volumeChanged(volume: number) {
+    this.service.updateCharacteristic(this.hap.Characteristic.On, volume !== 0);
+    this.service.updateCharacteristic(this.hap.Characteristic.Brightness, volume);
   }
 
   getVolumeState(): CharacteristicValue {

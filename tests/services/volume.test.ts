@@ -9,6 +9,7 @@ describe('Pause service', () => {
   let cleanmateService: jest.Mocked<CleanmateService>;
   let log: jest.Mocked<Logging>;
   let volumeService: VolumeService;
+  let updateCharacteristicSpy: jest.SpyInstance;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
@@ -19,6 +20,7 @@ describe('Pause service', () => {
     );
     log = createLoggingMock();
     volumeService = new VolumeService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    updateCharacteristicSpy = jest.spyOn(volumeService.services[0], 'updateCharacteristic');
   });
 
   afterEach(() => {
@@ -27,6 +29,16 @@ describe('Pause service', () => {
 
   test('Has one service', () => {
     expect(volumeService.services).toHaveLength(1);
+  });
+
+  test('Update characteristic when volume changes', () => {
+    cleanmateService.events.emit('volumeChange', 0);
+    expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.On, false);
+    expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.Brightness, 0);
+
+    cleanmateService.events.emit('volumeChange', 100);
+    expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.On, true);
+    expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.Brightness, 100);
   });
 
   test('Get volume active state', () => {
