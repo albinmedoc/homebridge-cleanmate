@@ -4,7 +4,7 @@ import CleanmatePlugin from '../src/cleanmatePlugin';
 import { PLATFORM_NAME } from '../src/settings';
 import { Config } from '../src/types';
 import Constants from './constants';
-import { createHomebridgeMock } from './__mocks__';
+import { createHomebridgeMock, createLoggingMock } from './__mocks__';
 
 const minConfig: Config = {
   accessory: 'homebridge-cleanmate',
@@ -16,10 +16,11 @@ const minConfig: Config = {
 jest.useFakeTimers();
 describe('Cleanmate plugin', () => {
   let homebridge: jest.Mocked<API>;
-  const log: Logging = console as unknown as Logging;
+  let log: jest.Mocked<Logging>;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
+    log = createLoggingMock();
   });
 
   afterEach(() => {

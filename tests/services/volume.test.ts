@@ -1,5 +1,5 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock } from '../__mocks__';
+import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
 import { VolumeService } from '../../src/services';
 import Constants from '../constants';
 import CleanmateService from '../../src/cleanmateService';
@@ -7,8 +7,8 @@ import CleanmateService from '../../src/cleanmateService';
 describe('Pause service', () => {
   let homebridge: jest.Mocked<API>;
   let cleanmateService: jest.Mocked<CleanmateService>;
+  let log: jest.Mocked<Logging>;
   let volumeService: VolumeService;
-  const log: Logging = console as unknown as Logging;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
@@ -17,6 +17,7 @@ describe('Pause service', () => {
       Constants.AUTH_CODE,
       0,
     );
+    log = createLoggingMock();
     volumeService = new VolumeService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
   });
 

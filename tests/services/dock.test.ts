@@ -1,16 +1,16 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock } from '../__mocks__';
+import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
 import { DockSensor } from '../../src/services';
 import Constants from '../constants';
 import CleanmateService from '../../src/cleanmateService';
 import { WorkState } from '../../src/types';
 
 describe('Dock service', () => {
-  let homebridge: jest.Mocked<API>;
   let cleanmateService: jest.Mocked<CleanmateService>;
+  let homebridge: jest.Mocked<API>;
+  let log: jest.Mocked<Logging>;
   let dockSensor: DockSensor;
   let updateCharacteristicSpy: jest.SpyInstance;
-  const log: Logging = console as unknown as Logging;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
@@ -19,6 +19,7 @@ describe('Dock service', () => {
       Constants.AUTH_CODE,
       0,
     );
+    log = createLoggingMock();
     dockSensor = new DockSensor(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
     updateCharacteristicSpy = jest.spyOn(dockSensor.services[0], 'updateCharacteristic');
   });

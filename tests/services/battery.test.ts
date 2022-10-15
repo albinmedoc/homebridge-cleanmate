@@ -1,5 +1,5 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock } from '../__mocks__';
+import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
 import { BatteryService } from '../../src/services';
 import Constants from '../constants';
 import CleanmateService from '../../src/cleanmateService';
@@ -8,9 +8,9 @@ import { WorkState } from '../../src/types';
 describe('Battery service', () => {
   let homebridge: jest.Mocked<API>;
   let cleanmateService: jest.Mocked<CleanmateService>;
+  let log: jest.Mocked<Logging>;
   let batteryService: BatteryService;
   let updateCharacteristicSpy: jest.SpyInstance;
-  const log: Logging = console as unknown as Logging;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
@@ -19,6 +19,7 @@ describe('Battery service', () => {
       Constants.AUTH_CODE,
       0,
     );
+    log = createLoggingMock();
     batteryService = new BatteryService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
     updateCharacteristicSpy = jest.spyOn(batteryService.services[0], 'updateCharacteristic');
   });

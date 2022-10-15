@@ -1,5 +1,5 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock } from '../__mocks__';
+import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
 import { RoomService } from '../../src/services';
 import Constants from '../constants';
 import CleanmateService from '../../src/cleanmateService';
@@ -8,8 +8,8 @@ import { PluginConfig } from '../../src/types';
 describe('Dock service', () => {
   let homebridge: jest.Mocked<API>;
   let cleanmateService: jest.Mocked<CleanmateService>;
+  let log: jest.Mocked<Logging>;
   let roomService: RoomService;
-  const log: Logging = console as unknown as Logging;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
@@ -18,6 +18,7 @@ describe('Dock service', () => {
       Constants.AUTH_CODE,
       0,
     );
+    log = createLoggingMock();
     roomService = new RoomService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
   });
 
