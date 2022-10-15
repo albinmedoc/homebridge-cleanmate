@@ -1,7 +1,7 @@
 import { AccessoryPlugin, Logging, API, Service, AccessoryConfig } from 'homebridge';
 import CleanmateService from './cleanmateService';
 import {
-  BatteryServide,
+  BatteryService,
   DockSensor,
   FindSwitch,
   InformationService,
@@ -18,10 +18,10 @@ class CleanmatePlugin implements AccessoryPlugin {
 
   cleanmateService: CleanmateService;
   services: ServiceBase[];
+  private config: PluginConfig;
 
   constructor(logger: Logging, config: AccessoryConfig, api: API) {
-
-    const conf: PluginConfig = {
+    this.config = {
       ...config as Config,
       pollInterval: config.pollInterval ?? 30,
       lowBatteryPercentage: config.lowBatteryPercentage ?? 15,
@@ -53,18 +53,18 @@ class CleanmatePlugin implements AccessoryPlugin {
       roomTimeout: config.roomTimeout ?? 30,
       rooms: config.rooms ?? [],
     };
-    this.cleanmateService = new CleanmateService(conf.ipAddress, conf.authCode, conf.pollInterval);
+    this.cleanmateService = new CleanmateService(this.config.ipAddress, this.config.authCode, this.config.pollInterval);
 
     this.services = [
-      new MainService(api.hap, logger, conf, this.cleanmateService),
-      new InformationService(api.hap, logger, conf, this.cleanmateService),
-      new BatteryServide(api.hap, logger, conf, this.cleanmateService),
-      ...(conf.pauseSwitch.enable ? [new PauseSwitch(api.hap, logger, conf, this.cleanmateService)] : []),
-      ...(conf.occupancySensor.enable ? [new DockSensor(api.hap, logger, conf, this.cleanmateService)] : []),
-      ...(conf.motionSensor.enable ? [new ProblemSensor(api.hap, logger, conf, this.cleanmateService)] : []),
-      ...(conf.volume.enable ? [new VolumeService(api.hap, logger, conf, this.cleanmateService)] : []),
-      ...(conf.findSwitch.enable ? [new FindSwitch(api.hap, logger, conf, this.cleanmateService)] : []),
-      ...(conf.rooms.length ? [new RoomService(api.hap, logger, conf, this.cleanmateService)] : []),
+      new MainService(api.hap, logger, this.config, this.cleanmateService),
+      new InformationService(api.hap, logger, this.config, this.cleanmateService),
+      new BatteryService(api.hap, logger, this.config, this.cleanmateService),
+      ...(this.config.pauseSwitch.enable ? [new PauseSwitch(api.hap, logger, this.config, this.cleanmateService)] : []),
+      ...(this.config.occupancySensor.enable ? [new DockSensor(api.hap, logger, this.config, this.cleanmateService)] : []),
+      ...(this.config.motionSensor.enable ? [new ProblemSensor(api.hap, logger, this.config, this.cleanmateService)] : []),
+      ...(this.config.volume.enable ? [new VolumeService(api.hap, logger, this.config, this.cleanmateService)] : []),
+      ...(this.config.findSwitch.enable ? [new FindSwitch(api.hap, logger, this.config, this.cleanmateService)] : []),
+      ...(this.config.rooms.length ? [new RoomService(api.hap, logger, this.config, this.cleanmateService)] : []),
     ];
   }
 

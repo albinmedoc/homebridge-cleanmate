@@ -1,4 +1,4 @@
-import BatteryServide from './batteryService';
+import BatteryService from './batteryService';
 import DockSensor from './dockSensor';
 import FindSwitch from './findSwitch';
 import InformationService from './informationService';
@@ -9,7 +9,7 @@ import VolumeService from './volumeService';
 import RoomService from './roomService';
 
 export {
-  BatteryServide,
+  BatteryService,
   DockSensor,
   FindSwitch,
   InformationService,
