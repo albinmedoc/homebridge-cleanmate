@@ -1,16 +1,13 @@
 import { API, Logging } from 'homebridge';
-import { createHomebridgeMock } from '../__mocks__/homebridge';
-import { createCleanmateServiceMock } from '../__mocks__/cleanmateService';
+import { createCleanmateServiceMock, createHomebridgeMock } from '../__mocks__';
 import { VolumeService } from '../../src/services';
 import Constants from '../constants';
 import CleanmateService from '../../src/cleanmateService';
-import { WorkState } from '../../src/types';
 
 describe('Pause service', () => {
   let homebridge: jest.Mocked<API>;
   let cleanmateService: jest.Mocked<CleanmateService>;
   let volumeService: VolumeService;
-  let updateCharacteristicSpy: jest.SpyInstance;
   const log: Logging = console as unknown as Logging;
 
   beforeEach(() => {
@@ -21,7 +18,6 @@ describe('Pause service', () => {
       0,
     );
     volumeService = new VolumeService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
-    updateCharacteristicSpy = jest.spyOn(volumeService.services[0], 'updateCharacteristic');
   });
 
   afterEach(() => {

@@ -40,7 +40,7 @@ const Service = Object.assign(createServiceMock(), {
   Lightbulb: createServiceMock(),
 });
 
-export const createHomebridgeMock = () =>
+export default () =>
   ({
     registerAccessory: jest.fn(),
     hap: { Characteristic, Service },

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import CleanmateService from '../../src/cleanmateService';
 
-export const createCleanmateServiceMock = (ipAddress: string, authCode: string, pollInterval?: number) => {
+export default (ipAddress: string, authCode: string, pollInterval?: number) => {
   const events = new EventEmitter();
   class CleanmateServiceMock extends CleanmateService {}
   CleanmateService.prototype['events'] = events;

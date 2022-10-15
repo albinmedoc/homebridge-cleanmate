@@ -1,6 +1,5 @@
 import { API, Logging } from 'homebridge';
-import { createHomebridgeMock } from '../__mocks__/homebridge';
-import { createCleanmateServiceMock } from '../__mocks__/cleanmateService';
+import { createCleanmateServiceMock, createHomebridgeMock } from '../__mocks__';
 import { BatteryService } from '../../src/services';
 import Constants from '../constants';
 import CleanmateService from '../../src/cleanmateService';
