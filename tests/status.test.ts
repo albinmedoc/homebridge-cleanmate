@@ -32,6 +32,15 @@ describe('Status', () => {
     });
   });
 
+  test('Can poll status at interval', () => {
+    jest.useFakeTimers();
+    jest.spyOn(global, 'setInterval');
+    const pollInterval = 15;
+    cleanmateService = new CleanmateService(Constants.IP_ADDRESS, Constants.AUTH_CODE, pollInterval);
+    expect(setInterval).toHaveBeenCalledTimes(1);
+    expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), pollInterval * 1000);
+  });
+
   test('Can set status', (done) => {
     const client = cleanmateService['client'];
     const buffer = Buffer.from('7b2276657273696f6e223a22312e30222c22636f6e74726f6c223a7b227461726765744964223a2230222c2274617267657454797' +
