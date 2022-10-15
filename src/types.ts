@@ -35,7 +35,7 @@ interface BaseConfig {
         enable?: boolean;
         name?: string;
     };
-    roomTimeout: number;
+    roomTimeout?: number;
     rooms?: Array<{
         id: number;
         name: string;
