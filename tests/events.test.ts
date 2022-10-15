@@ -12,6 +12,15 @@ describe('Events', () => {
     cleanmateService = new CleanmateService(Constants.IP_ADDRESS, Constants.AUTH_CODE);
   });
 
+  test('Can remove event listener', () => {
+    const callback = jest.fn();
+
+    cleanmateService.addListener('batteryLevelChange', callback);
+    cleanmateService.removeListener('batteryLevelChange', callback);
+    cleanmateService['batteryLevel'] = 0;
+    expect(callback).not.toBeCalled();
+  });
+
   test('Triggers event when batteryLevel changes', (done) => {
     const batteryLevel = 20;
 
