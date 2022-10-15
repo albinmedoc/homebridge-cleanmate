@@ -13,6 +13,7 @@ const minConfig: Config = {
   authCode: Constants.AUTH_CODE,
 };
 
+jest.useFakeTimers();
 describe('Cleanmate plugin', () => {
   let homebridge: jest.Mocked<API>;
   const log: Logging = console as unknown as Logging;
