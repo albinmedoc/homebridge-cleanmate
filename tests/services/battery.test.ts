@@ -50,6 +50,14 @@ describe('Battery service', () => {
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.ChargingState, 1);
   });
 
+  test('Get low battery state', () => {
+    jest.spyOn(cleanmateService, 'batteryLevel', 'get').mockReturnValue(50);
+    expect(batteryService['getLowBatteryState']()).toEqual(0);
+
+    jest.spyOn(cleanmateService, 'batteryLevel', 'get').mockReturnValue(5);
+    expect(batteryService['getLowBatteryState']()).toEqual(1);
+  });
+
   test('Get battery level state', () => {
     jest.spyOn(cleanmateService, 'batteryLevel', 'get').mockReturnValue(50);
     expect(batteryService['getBatteryLevelState']()).toEqual(50);
