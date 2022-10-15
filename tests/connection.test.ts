@@ -6,13 +6,14 @@ import CleanmateConnection from '../src/cleanmateConnection';
 describe('CleanmateConnection', () => {
 
   const server = net.createServer();
-  const connection = new CleanmateConnection(Constants.IP_ADDRESS, Constants.AUTH_CODE);
+  let connection: CleanmateConnection;
   const sockets: Set<net.Socket> = new Set();
 
   /**
   * Start server and keep track of all sockets
   */
-  beforeAll((done) => {
+  beforeEach((done) => {
+    connection = new CleanmateConnection(Constants.IP_ADDRESS, Constants.AUTH_CODE);
     server.listen(8888, Constants.IP_ADDRESS, () => {
       done();
     });
@@ -23,24 +24,21 @@ describe('CleanmateConnection', () => {
   });
 
   /**
-  * Destroy all sockets and close server
-  */
-  afterAll((done) => {
-    for (const socket of sockets) {
-      socket.destroy();
-    }
-    sockets.clear();
-    server.close(() => {
-      done();
-    });
-  });
-
-  /**
   * Disconnect client from server
   * and restore the spy created with spyOn
+  *
+  * Destroy all sockets and close server
   */
   afterEach((done) => {
-    connection.disconnect().then(() => done());
+    connection.disconnect().then(() => {
+      for (const socket of sockets) {
+        socket.destroy();
+      }
+      sockets.clear();
+      server.close(() => {
+        done();
+      });
+    });
     jest.restoreAllMocks();
   });
 
@@ -48,6 +46,13 @@ describe('CleanmateConnection', () => {
     expect(connection['connected']).toEqual(false);
     await connection.connect();
     expect(connection['connected']).toEqual(true);
+  });
+
+  test('Connect rejects when connection fails', async () => {
+    connection['ipAddress'] = 'notlocalhost';
+    expect(connection['connected']).toEqual(false);
+    expect(connection.connect()).rejects;
+    expect(connection['connected']).toEqual(false);
   });
 
   test('Can disconnect', async () => {
