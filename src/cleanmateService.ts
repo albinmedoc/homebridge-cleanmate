@@ -157,7 +157,7 @@ class CleanmateService extends CleanmateConnection {
 
   /**
   * Send a request to get the status.
-  * If you want to act on the response, make sure you have registered a event listener using the {@link on} function.
+  * If you want to act on the response, make sure you have registered a event listener using the {@link addListener} function.
   */
   public pollStatus(): Promise<void> {
     const request = this.makeRequest({
