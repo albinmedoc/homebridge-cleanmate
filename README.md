@@ -21,7 +21,9 @@ Right now there is no official documentation or API over how to control the robo
   * **Rotate direction** controls the mop mode (configurable in config)
 * Pause **Switch** that will pause the robot when enabled and continues when disabled (optional, and can be inverted in config)
 * **Motion sensor** that will fire if the robot has a problem (optional, and can be inverted in config)
-* **Occupancy sensor** that will fire when the robot is docked (optional and can be inverted in config) 
+* **Occupancy sensor** that will fire when the robot is docked (optional and can be inverted in config)
+* Volume controll using a **Lightbulb** (optional)
+* Per room **Switch** (optional, read [Room cleaning](#room-cleaning) to understand how it works)
 
 ## Requirements
 - [Homebridge](https://github.com/nfarina/homebridge) HomeKit support for the impatient
@@ -80,7 +82,7 @@ This is an accessory plugin, the configuration should be set under accessories i
 | `volume?.name?`              | The name of the lightbulb                                                |  Docked   | String  |
 | `findSwitch?.enable?`        | Add a switch that will help you find the robot                           |   false   | Boolean |
 | `findSwitch?.name?`          | The name of the switch                                                   |  Docked   | String  |
-| `roomTimeout`                | The time to wait for a new room selection                                |    30     | Number  |
+| `roomTimeout?`                | The time to wait for a new room selection                                |    30     | Number  |
 | `rooms?[].id`                | The id of the room                                                       |           | Number  |
 | `rooms?[].name`              | The name of the room                                                     |           | String  |
 
@@ -91,6 +93,9 @@ This is an accessory plugin, the configuration should be set under accessories i
 | High   | 20  |
 | Medium | 40  |
 | Low    | 60  |
+
+## Room cleaning
+To start the Room Clean Mode, you can enable/disable the room switches. The cleaning will start after x seconds specified as roomTimeout in config (default 30s). This is the time you have to enable/disable another room. The timeout will restart every time you make a change.
 
 ## How to get the authentication code
 Currenly there is no easy way to get the authentication code (please let me know if there is).
