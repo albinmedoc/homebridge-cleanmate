@@ -1,3 +1,5 @@
+import { Config, MopMode, PluginConfig } from '../src/types';
+
 class Constants {
   IP_ADDRESS = '127.0.0.1';
   AUTH_CODE = 'ABCDEFGHIJ';
@@ -68,6 +70,47 @@ class Constants {
   FIND_CMD = 'bf000000fa00000001000000c5270000010000007b2276657273696f6e223a22312e30222c22636f6e74726f6c223a7b2262726f616463617374223a223' +
   '0222c2274617267657454797065223a2232222c227461726765744964223a224331463534464530463136323439363839353930454633433646303431333342222c226' +
   '1757468436f6465223a224142434445464748494a227d2c2276616c7565223a7b2266696e64223a22222c227472616e736974436d64223a22313433227d7d';
+
+  FULL_CONFIG: PluginConfig = {
+    accessory: 'homebridge-cleanmate',
+    name: 'homebridge-cleanmate',
+    ipAddress: this.IP_ADDRESS,
+    authCode: this.AUTH_CODE,
+    pollInterval: 0,
+    lowBatteryPercentage: 15,
+    clockwiseMode: MopMode.High,
+    counterClockwiseMode: MopMode.Low,
+    pauseSwitch: {
+      enable: true,
+      name: 'Pause',
+      inverted: false,
+    },
+    motionSensor: {
+      enable: true,
+      name: 'Motion',
+      inverted: false,
+    },
+    occupancySensor: {
+      enable: true,
+      name: 'Occupancy',
+      inverted: false,
+    },
+    volume: {
+      enable: true,
+      name: 'Volume',
+    },
+    findSwitch: {
+      enable: true,
+      name: 'Find',
+    },
+    roomTimeout: 20,
+    rooms: [
+      {
+        id: 1,
+        name: 'Room 1',
+      },
+    ],
+  };
 }
 
 export default new Constants();
