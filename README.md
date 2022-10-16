@@ -1,3 +1,4 @@
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![GitHub last commit](https://img.shields.io/github/last-commit/albinmedoc/homebridge-cleanmate.svg)](https://github.com/albinmedoc/homebridge-cleanmate)
 [![npm](https://img.shields.io/npm/v/homebridge-cleanmate?label=npm%20package)](https://github.com/albinmedoc/homebridge-cleanmate)
 [![npm](https://img.shields.io/npm/dt/homebridge-cleanmate.svg)](https://www.npmjs.com/package/homebridge-cleanmate)
