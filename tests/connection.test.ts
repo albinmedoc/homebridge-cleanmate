@@ -48,6 +48,16 @@ describe('CleanmateConnection', () => {
     expect(connection['connected']).toEqual(true);
   });
 
+  test('Share connect promise', () => {
+    const promise1 = connection.connect();
+    const storedPromise = connection['connectPromise'];
+    expect(storedPromise).not.toBeFalsy();
+
+    const promise2 = connection.connect();
+    expect(promise2).toStrictEqual(promise1);
+    expect(promise2).toStrictEqual(storedPromise);
+  });
+
   test('Connect rejects when connection fails', async () => {
     connection['ipAddress'] = 'notlocalhost';
     expect(connection['connected']).toEqual(false);

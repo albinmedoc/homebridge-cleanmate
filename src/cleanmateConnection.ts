@@ -10,6 +10,7 @@ class CleanmateConnection {
   private port = 8888;
   private connected = false;
   private keepAlive = false;
+  private connectPromise?: Promise<void>;
 
   constructor(ipAddress: string, authCode: string) {
     this.ipAddress = ipAddress;
@@ -34,26 +35,28 @@ class CleanmateConnection {
 
   public connect(keepAlive: boolean = false): Promise<void> {
     this.keepAlive = keepAlive;
-    return new Promise((resolve, reject) => {
-      if(this.connected && this.client.writable) {
-        return resolve();
-      }
+    if(!this.connectPromise) {
+      this.connectPromise = new Promise<void>((resolve, reject) => {
+        if(this.connected) {
+          return resolve();
+        }
+        const connectHandler = () => {
+          this.connected = true;
+          this.client.removeListener('error', errorHandler);
+          resolve();
+        };
 
-      const connectHandler = () => {
-        this.connected = true;
-        this.client.removeListener('error', errorHandler);
-        resolve();
-      };
+        const errorHandler = (err: Error) => {
+          this.connected = false;
+          this.client.removeListener('connect', connectHandler);
+          reject(err);
+        };
 
-      const errorHandler = (err: Error) => {
-        this.connected = false;
-        this.client.removeListener('connect', connectHandler);
-        reject(err);
-      };
-
-      this.client.connect(this.port, this.ipAddress, connectHandler);
-      this.client.once('error', errorHandler);
-    });
+        this.client.connect(this.port, this.ipAddress, connectHandler);
+        this.client.once('error', errorHandler);
+      }).finally(() => this.connectPromise = undefined);
+    }
+    return this.connectPromise;
   }
 
   public disconnect(): Promise<void> {
