@@ -29,6 +29,8 @@ Show your Homebridge config.json here, remove any sensitive information.
 
 **Environment:**
 
+* **Cleanmate model**:
+* **Cleanmate version**:
 * **Plugin Version**:
 * **Homebridge Version**: <!-- homebridge -V -->
 * **Node.js Version**: <!-- node -v -->
