@@ -77,4 +77,11 @@ describe('Cleanmate plugin', () => {
     const plugin = new CleanmatePlugin(log, fullServiceConfig, homebridge);
     expect(plugin.getServices()).toHaveLength(9);
   });
+
+  test('Make robot talk when identify is called', () => {
+    const plugin = new CleanmatePlugin(log, minConfig, homebridge);
+    const findRobotSpy = jest.spyOn(plugin.cleanmateService, 'findRobot');
+    plugin.identify();
+    expect(findRobotSpy).toBeCalled();
+  });
 });

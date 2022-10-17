@@ -68,6 +68,10 @@ class CleanmatePlugin implements AccessoryPlugin {
     ];
   }
 
+  identify(): void {
+    this.cleanmateService.findRobot();
+  }
+
   /* Get the active services */
   getServices() {
     const services: Service[] = [];
