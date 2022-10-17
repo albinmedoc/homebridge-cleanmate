@@ -80,7 +80,7 @@ describe('Cleanmate plugin', () => {
 
   test('Make robot talk when identify is called', () => {
     const plugin = new CleanmatePlugin(log, minConfig, homebridge);
-    const findRobotSpy = jest.spyOn(plugin.cleanmateService, 'findRobot');
+    const findRobotSpy = jest.spyOn(plugin.cleanmateService, 'findRobot').mockImplementation();
     plugin.identify();
     expect(findRobotSpy).toBeCalled();
   });
