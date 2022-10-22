@@ -1,7 +1,7 @@
 import { CharacteristicValue, HAP, Logging, Service } from 'homebridge';
-import CleanmateService from '../cleanmateService';
 import { PluginConfig } from '../types';
 import { ServiceBase } from './serviceBase';
+import type Cleanmate from 'cleanmate';
 
 interface Room {
     id: number;
@@ -13,8 +13,8 @@ export default class RoomService extends ServiceBase {
   private readonly roomsToClean = new Set<number>();
   private roomTimeout?: NodeJS.Timeout;
 
-  constructor(hap: HAP, log: Logging, config: PluginConfig, cleanmateService: CleanmateService){
-    super(hap, log, config, cleanmateService);
+  constructor(hap: HAP, log: Logging, config: PluginConfig, cleanmate: Cleanmate){
+    super(hap, log, config, cleanmate);
     this.config.rooms.forEach((room) => {
       this.createRoom(room);
     });
@@ -49,7 +49,7 @@ export default class RoomService extends ServiceBase {
       clearTimeout(this.roomTimeout);
       if (this.roomsToClean.size > 0) {
         this.roomTimeout = setTimeout(
-          () => this.cleanmateService.cleanRooms([...this.roomsToClean]),
+          () => this.cleanmate.cleanRooms([...this.roomsToClean]),
           this.config.roomTimeout * 1000,
         );
       }

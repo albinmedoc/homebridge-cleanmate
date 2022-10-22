@@ -1,5 +1,5 @@
 import { AccessoryPlugin, Logging, API, Service, AccessoryConfig } from 'homebridge';
-import CleanmateService from './cleanmateService';
+import Cleanmate from 'cleanmate';
 import {
   BatteryService,
   DockSensor,
@@ -16,7 +16,7 @@ import { Config, MopMode, PluginConfig } from './types';
 
 class CleanmatePlugin implements AccessoryPlugin {
 
-  cleanmateService: CleanmateService;
+  cleanmateService: Cleanmate;
   services: ServiceBase[];
   private config: PluginConfig;
 
@@ -53,7 +53,8 @@ class CleanmatePlugin implements AccessoryPlugin {
       roomTimeout: config.roomTimeout ?? 30,
       rooms: config.rooms ?? [],
     };
-    this.cleanmateService = new CleanmateService(this.config.ipAddress, this.config.authCode, this.config.pollInterval);
+
+    this.cleanmateService = new Cleanmate(this.config.ipAddress, this.config.authCode, this.config.pollInterval);
 
     this.services = [
       new MainService(api.hap, logger, this.config, this.cleanmateService),

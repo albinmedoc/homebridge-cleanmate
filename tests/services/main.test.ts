@@ -1,26 +1,26 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { MainService } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanmate from 'cleanmate';
 import { MopMode, WorkMode, WorkState } from '../../src/types';
 
 describe('Main service', () => {
   let homebridge: jest.Mocked<API>;
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanmate>;
   let log: jest.Mocked<Logging>;
   let mainService: MainService;
   let updateCharacteristicSpy: jest.SpyInstance;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    mainService = new MainService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    mainService = new MainService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
     updateCharacteristicSpy = jest.spyOn(mainService.services[0], 'updateCharacteristic');
   });
 
@@ -33,42 +33,42 @@ describe('Main service', () => {
   });
 
   test('Update characteristic when workstate changes', () => {
-    cleanmateService.events.emit('workStateChange', WorkState.Charging);
+    cleanmate.events.emit('workStateChange', WorkState.Charging);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.Active, false);
 
-    jest.spyOn(cleanmateService, 'workMode', 'get').mockReturnValue(WorkMode.Standard);
-    cleanmateService.events.emit('workStateChange', WorkState.Cleaning);
+    jest.spyOn(cleanmate, 'workMode', 'get').mockReturnValue(WorkMode.Standard);
+    cleanmate.events.emit('workStateChange', WorkState.Cleaning);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.Active, true);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.RotationSpeed, expect.anything());
   });
 
   test('Update characteristic when workmode changes', () => {
-    cleanmateService.events.emit('workModeChange', WorkMode.Silent);
+    cleanmate.events.emit('workModeChange', WorkMode.Silent);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.RotationSpeed, expect.anything());
   });
 
   test('Update characteristic when mopmode changes', () => {
-    cleanmateService.events.emit('mopModeChange', MopMode.High);
+    cleanmate.events.emit('mopModeChange', MopMode.High);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.RotationDirection, 0);
 
-    cleanmateService.events.emit('mopModeChange', MopMode.Low);
+    cleanmate.events.emit('mopModeChange', MopMode.Low);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.RotationDirection, 1);
   });
 
   test('Get active state', () => {
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Paused);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Paused);
     expect(mainService['getActiveState']()).toEqual(false);
 
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
     expect(mainService['getActiveState']()).toEqual(true);
   });
 
   test('Set active state', () => {
-    const pauseSpy = jest.spyOn(cleanmateService, 'pause').mockResolvedValue();
+    const pauseSpy = jest.spyOn(cleanmate, 'pause').mockResolvedValue();
     mainService['setActiveState'](false);
     expect(pauseSpy).toBeCalled();
 
-    const startSpy = jest.spyOn(cleanmateService, 'start').mockResolvedValue();
+    const startSpy = jest.spyOn(cleanmate, 'start').mockResolvedValue();
     mainService['setActiveState'](true);
     expect(startSpy).toBeCalled();
   });
@@ -93,27 +93,27 @@ describe('Main service', () => {
   });
 
   test('Get speed state', () => {
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Charging);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Charging);
     expect(mainService['getSpeedState']()).toEqual(0);
 
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
 
-    jest.spyOn(cleanmateService, 'workMode', 'get').mockReturnValue(WorkMode.Silent);
+    jest.spyOn(cleanmate, 'workMode', 'get').mockReturnValue(WorkMode.Silent);
     expect(mainService['getSpeedState']()).toEqual(17);
 
-    jest.spyOn(cleanmateService, 'workMode', 'get').mockReturnValue(WorkMode.Standard);
+    jest.spyOn(cleanmate, 'workMode', 'get').mockReturnValue(WorkMode.Standard);
     expect(mainService['getSpeedState']()).toEqual(50);
 
-    jest.spyOn(cleanmateService, 'workMode', 'get').mockReturnValue(WorkMode.Intensive);
+    jest.spyOn(cleanmate, 'workMode', 'get').mockReturnValue(WorkMode.Intensive);
     expect(mainService['getSpeedState']()).toEqual(82);
   });
 
   test('Set speed state', () => {
-    const chargeSpy = jest.spyOn(cleanmateService, 'charge').mockResolvedValue();
+    const chargeSpy = jest.spyOn(cleanmate, 'charge').mockResolvedValue();
     mainService['setSpeedState'](0);
     expect(chargeSpy).toBeCalled();
 
-    const startSpy = jest.spyOn(cleanmateService, 'start').mockResolvedValue();
+    const startSpy = jest.spyOn(cleanmate, 'start').mockResolvedValue();
 
     mainService['setSpeedState'](10);
     expect(startSpy).toHaveBeenCalledWith(WorkMode.Silent);
@@ -127,15 +127,15 @@ describe('Main service', () => {
 
   test('Set rotation state', () => {
 
-    jest.spyOn(cleanmateService, 'mopMode', 'get').mockReturnValue(MopMode.High);
+    jest.spyOn(cleanmate, 'mopMode', 'get').mockReturnValue(MopMode.High);
     expect(mainService['getRotationState']()).toEqual(0);
 
-    jest.spyOn(cleanmateService, 'mopMode', 'get').mockReturnValue(MopMode.Low);
+    jest.spyOn(cleanmate, 'mopMode', 'get').mockReturnValue(MopMode.Low);
     expect(mainService['getRotationState']()).toEqual(1);
   });
 
   test('Set rotation state', () => {
-    const mopModeSpy = jest.spyOn(cleanmateService, 'setMopMode').mockResolvedValue();
+    const mopModeSpy = jest.spyOn(cleanmate, 'setMopMode').mockResolvedValue();
     mainService['setRotationState'](0);
     expect(mopModeSpy).toBeCalledWith(MopMode.High);
 

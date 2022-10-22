@@ -1,25 +1,25 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { InformationService } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanmate from 'cleanmate';
 
 describe('Dock service', () => {
   let homebridge: jest.Mocked<API>;
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanmate>;
   let log: jest.Mocked<Logging>;
   let informationService: InformationService;
   let updateCharacteristicSpy: jest.SpyInstance;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    informationService = new InformationService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    informationService = new InformationService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
     updateCharacteristicSpy = jest.spyOn(informationService.services[0], 'updateCharacteristic');
   });
 
@@ -33,13 +33,13 @@ describe('Dock service', () => {
 
   test('Update characteristic when version changes', () => {
     const version = 'Version 1';
-    cleanmateService.events.emit('versionChange', version);
+    cleanmate.events.emit('versionChange', version);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.FirmwareRevision, version);
   });
 
   test('Get version state', () => {
     const version = 'Version 2';
-    jest.spyOn(cleanmateService, 'version', 'get').mockReturnValue(version);
+    jest.spyOn(cleanmate, 'version', 'get').mockReturnValue(version);
     expect(informationService['getFirmwareRevisionState']()).toEqual(version);
   });
 });

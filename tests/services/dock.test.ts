@@ -1,12 +1,12 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { DockSensor } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanamte from 'cleanmate';
 import { WorkState } from '../../src/types';
 
 describe('Dock service', () => {
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanamte>;
   let homebridge: jest.Mocked<API>;
   let log: jest.Mocked<Logging>;
   let dockSensor: DockSensor;
@@ -14,13 +14,13 @@ describe('Dock service', () => {
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    dockSensor = new DockSensor(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    dockSensor = new DockSensor(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
     updateCharacteristicSpy = jest.spyOn(dockSensor.services[0], 'updateCharacteristic');
   });
 
@@ -33,18 +33,18 @@ describe('Dock service', () => {
   });
 
   test('Update characteristic when workstate changes', () => {
-    cleanmateService.events.emit('workStateChange', WorkState.Cleaning);
+    cleanmate.events.emit('workStateChange', WorkState.Cleaning);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.OccupancyDetected, false);
 
-    cleanmateService.events.emit('workStateChange', WorkState.Charging);
+    cleanmate.events.emit('workStateChange', WorkState.Charging);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.OccupancyDetected, true);
   });
 
   test('Get dock state', () => {
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
     expect(dockSensor['getDockState']()).toEqual(false);
 
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Charging);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Charging);
     expect(dockSensor['getDockState']()).toEqual(true);
   });
 });

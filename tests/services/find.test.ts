@@ -1,24 +1,24 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { FindSwitch } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanmate from 'cleanmate';
 
 describe('Find service', () => {
   let homebridge: jest.Mocked<API>;
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanmate>;
   let log: jest.Mocked<Logging>;
   let findSwitch: FindSwitch;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    findSwitch = new FindSwitch(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    findSwitch = new FindSwitch(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
   });
 
   afterEach(() => {
@@ -30,7 +30,7 @@ describe('Find service', () => {
   });
 
   test('Set pause state', () => {
-    const startSpy = jest.spyOn(cleanmateService, 'findRobot').mockResolvedValue();
+    const startSpy = jest.spyOn(cleanmate, 'findRobot').mockResolvedValue();
     findSwitch['setFindState'](false);
     expect(startSpy).toBeCalledTimes(1);
 

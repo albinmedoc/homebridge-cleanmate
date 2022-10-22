@@ -1,25 +1,25 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { RoomService } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanmate from 'cleanmate';
 import { PluginConfig } from '../../src/types';
 
 describe('Dock service', () => {
   let homebridge: jest.Mocked<API>;
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanmate>;
   let log: jest.Mocked<Logging>;
   let roomService: RoomService;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    roomService = new RoomService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    roomService = new RoomService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
   });
 
   afterEach(() => {
@@ -43,11 +43,11 @@ describe('Dock service', () => {
     expect(roomService.services).toHaveLength(1);
 
     let config = addRoom(Constants.FULL_CONFIG, 2);
-    roomService = new RoomService(homebridge.hap, log, config, cleanmateService);
+    roomService = new RoomService(homebridge.hap, log, config, cleanmate);
     expect(roomService.services).toHaveLength(2);
 
     config = addRoom(config, 3);
-    roomService = new RoomService(homebridge.hap, log, config, cleanmateService);
+    roomService = new RoomService(homebridge.hap, log, config, cleanmate);
     expect(roomService.services).toHaveLength(3);
   });
 

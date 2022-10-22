@@ -4,7 +4,7 @@ import CleanmatePlugin from '../src/cleanmatePlugin';
 import { PLATFORM_NAME } from '../src/settings';
 import { Config } from '../src/types';
 import Constants from './constants';
-import { createHomebridgeMock, createLoggingMock } from './__mocks__';
+import { createHomebridgeMock, createLoggingMock } from './mocks';
 
 const minConfig: Config = {
   accessory: 'homebridge-cleanmate',

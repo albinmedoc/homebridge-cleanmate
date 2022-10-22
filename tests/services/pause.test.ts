@@ -1,26 +1,26 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { PauseSwitch } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanamte from 'cleanmate';
 import { WorkState } from '../../src/types';
 
 describe('Pause service', () => {
   let homebridge: jest.Mocked<API>;
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanamte>;
   let log: jest.Mocked<Logging>;
   let pauseSwitch: PauseSwitch;
   let updateCharacteristicSpy: jest.SpyInstance;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    pauseSwitch = new PauseSwitch(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    pauseSwitch = new PauseSwitch(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
     updateCharacteristicSpy = jest.spyOn(pauseSwitch.services[0], 'updateCharacteristic');
   });
 
@@ -33,27 +33,27 @@ describe('Pause service', () => {
   });
 
   test('Update characteristic when workstate changes', () => {
-    cleanmateService.events.emit('workStateChange', WorkState.Cleaning);
+    cleanmate.events.emit('workStateChange', WorkState.Cleaning);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.On, false);
 
-    cleanmateService.events.emit('workStateChange', WorkState.Paused);
+    cleanmate.events.emit('workStateChange', WorkState.Paused);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.On, true);
   });
 
   test('Get pause state', () => {
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Cleaning);
     expect(pauseSwitch['getPauseState']()).toEqual(false);
 
-    jest.spyOn(cleanmateService, 'workState', 'get').mockReturnValue(WorkState.Paused);
+    jest.spyOn(cleanmate, 'workState', 'get').mockReturnValue(WorkState.Paused);
     expect(pauseSwitch['getPauseState']()).toEqual(true);
   });
 
   test('Set pause state', () => {
-    const startSpy = jest.spyOn(cleanmateService, 'start').mockResolvedValue();
+    const startSpy = jest.spyOn(cleanmate, 'start').mockResolvedValue();
     pauseSwitch['setPauseState'](false);
     expect(startSpy).toBeCalled();
 
-    const pauseSpy = jest.spyOn(cleanmateService, 'pause').mockResolvedValue();
+    const pauseSpy = jest.spyOn(cleanmate, 'pause').mockResolvedValue();
     pauseSwitch['setPauseState'](true);
     expect(pauseSpy).toBeCalled();
   });

@@ -1,13 +1,13 @@
 import { CharacteristicValue, HAP, Logging, Service } from 'homebridge';
-import CleanmateService from '../cleanmateService';
 import { PluginConfig, WorkState } from '../types';
 import { ServiceBase } from './serviceBase';
+import type Cleanmate from 'cleanmate';
 
 export default class DockSensor extends ServiceBase {
   private readonly service: Service;
 
-  constructor(hap: HAP, log: Logging, config: PluginConfig, cleanmateService: CleanmateService){
-    super(hap, log, config, cleanmateService);
+  constructor(hap: HAP, log: Logging, config: PluginConfig, cleanmate: Cleanmate){
+    super(hap, log, config, cleanmate);
 
     this.service = new this.hap.Service.Battery();
     this.service.getCharacteristic(this.hap.Characteristic.StatusLowBattery)
@@ -16,8 +16,8 @@ export default class DockSensor extends ServiceBase {
       .onGet(this.getBatteryLevelState.bind(this));
     this.service.getCharacteristic(this.hap.Characteristic.ChargingState)
       .onGet(this.getChargingState.bind(this));
-    this.cleanmateService.addListener('batteryLevelChange', this.batteryLevelChanged.bind(this));
-    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmate.addListener('batteryLevelChange', this.batteryLevelChanged.bind(this));
+    this.cleanmate.addListener('workStateChange', this.workStateChanged.bind(this));
   }
 
   private batteryLevelChanged(value: number){
@@ -39,7 +39,7 @@ export default class DockSensor extends ServiceBase {
   }
 
   private getLowBatteryState(): CharacteristicValue {
-    const lowBattery = this.cleanmateService.batteryLevel <= this.config.lowBatteryPercentage;
+    const lowBattery = this.cleanmate.batteryLevel <= this.config.lowBatteryPercentage;
     const lowBatteryState = lowBattery ?
       this.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW :
       this.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
@@ -47,12 +47,12 @@ export default class DockSensor extends ServiceBase {
   }
 
   private getBatteryLevelState(): CharacteristicValue {
-    const batteryLevelState = this.cleanmateService.batteryLevel;
+    const batteryLevelState = this.cleanmate.batteryLevel;
     return batteryLevelState;
   }
 
   private getChargingState(): CharacteristicValue {
-    const charging = this.cleanmateService.workState === WorkState.Charging;
+    const charging = this.cleanmate.workState === WorkState.Charging;
     const chargingState = charging ?
       this.hap.Characteristic.ChargingState.CHARGING :
       this.hap.Characteristic.ChargingState.NOT_CHARGING;

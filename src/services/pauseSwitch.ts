@@ -1,19 +1,19 @@
 import { CharacteristicValue, HAP, Logging, Service } from 'homebridge';
-import CleanmateService from '../cleanmateService';
 import { PluginConfig, WorkState } from '../types';
 import { ServiceBase } from './serviceBase';
+import type Cleanmate from 'cleanmate';
 
 export default class PauseSwitch extends ServiceBase {
   private readonly service: Service;
 
-  constructor(hap: HAP, log: Logging, config: PluginConfig, cleanmateService: CleanmateService){
-    super(hap, log, config, cleanmateService);
+  constructor(hap: HAP, log: Logging, config: PluginConfig, cleanmate: Cleanmate){
+    super(hap, log, config, cleanmate);
 
     this.service = new this.hap.Service.Switch(`${this.config.name} ${this.config.pauseSwitch.name}`);
     this.service.getCharacteristic(this.hap.Characteristic.On)
       .onGet(this.getPauseState.bind(this))
       .onSet(this.setPauseState.bind(this));
-    this.cleanmateService.addListener('workStateChange', this.workStateChanged.bind(this));
+    this.cleanmate.addListener('workStateChange', this.workStateChanged.bind(this));
   }
 
   private workStateChanged(value: WorkState){
@@ -23,7 +23,7 @@ export default class PauseSwitch extends ServiceBase {
   }
 
   private getPauseState(): CharacteristicValue {
-    const paused = this.cleanmateService.workState === WorkState.Paused;
+    const paused = this.cleanmate.workState === WorkState.Paused;
     const onState = this.config.pauseSwitch.inverted ? !paused : paused;
     return onState;
   }
@@ -32,9 +32,9 @@ export default class PauseSwitch extends ServiceBase {
     const pause = this.config.pauseSwitch.inverted ? !value : !!value;
     this.log.debug('Set pause', pause);
     if(pause) {
-      this.cleanmateService.pause();
+      this.cleanmate.pause();
     }else {
-      this.cleanmateService.start();
+      this.cleanmate.start();
     }
   }
 

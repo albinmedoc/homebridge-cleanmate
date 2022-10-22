@@ -1,25 +1,25 @@
 import { API, Logging } from 'homebridge';
-import { createCleanmateServiceMock, createHomebridgeMock, createLoggingMock } from '../__mocks__';
+import { createCleanmateMock, createHomebridgeMock, createLoggingMock } from '../mocks';
 import { VolumeService } from '../../src/services';
 import Constants from '../constants';
-import CleanmateService from '../../src/cleanmateService';
+import Cleanmate from 'cleanmate';
 
 describe('Pause service', () => {
   let homebridge: jest.Mocked<API>;
-  let cleanmateService: jest.Mocked<CleanmateService>;
+  let cleanmate: jest.Mocked<Cleanmate>;
   let log: jest.Mocked<Logging>;
   let volumeService: VolumeService;
   let updateCharacteristicSpy: jest.SpyInstance;
 
   beforeEach(() => {
     homebridge = createHomebridgeMock();
-    cleanmateService = createCleanmateServiceMock(
+    cleanmate = createCleanmateMock(
       Constants.IP_ADDRESS,
       Constants.AUTH_CODE,
       0,
     );
     log = createLoggingMock();
-    volumeService = new VolumeService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmateService);
+    volumeService = new VolumeService(homebridge.hap, log, Constants.FULL_CONFIG, cleanmate);
     updateCharacteristicSpy = jest.spyOn(volumeService.services[0], 'updateCharacteristic');
   });
 
@@ -32,28 +32,28 @@ describe('Pause service', () => {
   });
 
   test('Update characteristic when volume changes', () => {
-    cleanmateService.events.emit('volumeChange', 0);
+    cleanmate.events.emit('volumeChange', 0);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.On, false);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.Brightness, 0);
 
-    cleanmateService.events.emit('volumeChange', 100);
+    cleanmate.events.emit('volumeChange', 100);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.On, true);
     expect(updateCharacteristicSpy).toBeCalledWith(homebridge.hap.Characteristic.Brightness, 100);
   });
 
   test('Get volume active state', () => {
-    jest.spyOn(cleanmateService, 'volume', 'get').mockReturnValue(0);
+    jest.spyOn(cleanmate, 'volume', 'get').mockReturnValue(0);
     expect(volumeService['getVolumeState']()).toEqual(false);
 
-    jest.spyOn(cleanmateService, 'volume', 'get').mockReturnValue(1);
+    jest.spyOn(cleanmate, 'volume', 'get').mockReturnValue(1);
     expect(volumeService['getVolumeState']()).toEqual(true);
 
-    jest.spyOn(cleanmateService, 'volume', 'get').mockReturnValue(100);
+    jest.spyOn(cleanmate, 'volume', 'get').mockReturnValue(100);
     expect(volumeService['getVolumeState']()).toEqual(true);
   });
 
   test('Set volume active state', () => {
-    const setVolumeSpy = jest.spyOn(cleanmateService, 'setVolume').mockResolvedValue();
+    const setVolumeSpy = jest.spyOn(cleanmate, 'setVolume').mockResolvedValue();
     volumeService['setVolumeState'](false);
     expect(setVolumeSpy).toBeCalledWith(0);
 
@@ -63,12 +63,12 @@ describe('Pause service', () => {
 
   test('Get volume level state', () => {
     const volume = 33;
-    jest.spyOn(cleanmateService, 'volume', 'get').mockReturnValue(volume);
+    jest.spyOn(cleanmate, 'volume', 'get').mockReturnValue(volume);
     expect(volumeService['getVolumeLevelState']()).toEqual(volume);
   });
 
   test('Set volume level state', () => {
-    const setVolumeSpy = jest.spyOn(cleanmateService, 'setVolume').mockResolvedValue();
+    const setVolumeSpy = jest.spyOn(cleanmate, 'setVolume').mockResolvedValue();
 
     volumeService['setVolumeLevelState'](0);
     expect(setVolumeSpy).toBeCalledWith(0);
