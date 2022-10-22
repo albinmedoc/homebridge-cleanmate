@@ -93,10 +93,10 @@ describe('CleanmateConnection', () => {
   });
 
   test('Can correctly format hex length', () => {
-    const formatHexLength = connection['formatHexLength'];
+    const getHexSize = connection['getHexSize'];
 
-    expect(formatHexLength(256)).toEqual('00010000');
-    expect(formatHexLength(60)).toEqual('3c000000');
+    expect(getHexSize(256)).toEqual('00010000');
+    expect(getHexSize(60)).toEqual('3c000000');
   });
 
   test('Can make request', () => {

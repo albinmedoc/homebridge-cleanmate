@@ -1,4 +1,3 @@
-import { Blob } from 'buffer';
 import net from 'net';
 
 class CleanmateConnection {
@@ -80,8 +79,8 @@ class CleanmateConnection {
     return hex;
   }
 
-  private formatHexLength(length: number): string {
-    const hex = length.toString(16);
+  private getHexSize(size: number): string {
+    const hex = size.toString(16);
     const temp = '0'.repeat(8 - hex.length) + hex;
     let out = '';
     for (let x = temp.length - 1; x > 0; x -= 2) {
@@ -101,10 +100,10 @@ class CleanmateConnection {
       },
       value,
     });
-    const requestSize = new Blob([request]).size + 20;
+    const requestSize = Buffer.from(request).length + 20;
     const requesthex = this.strToHex(request);
 
-    const packet = `${this.formatHexLength(requestSize)}fa00000001000000c527000001000000${requesthex}`;
+    const packet = `${this.getHexSize(requestSize)}fa00000001000000c527000001000000${requesthex}`;
     const data = Buffer.from(packet, 'hex');
     return data;
   }
